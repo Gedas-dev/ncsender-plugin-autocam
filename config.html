@@ -23,51 +23,49 @@
     height: auto; width: auto; line-height: 1.2; font: inherit; background: transparent; color: inherit; border: 0; padding: 0; }
 
   #ac-root .ac-side { background: var(--ac-soft); border-right: 1px solid var(--ac-line); display: flex; flex-direction: column; padding: 14px 10px; }
-  #ac-root .ac-brand { padding: 0 6px 14px; border-bottom: 1px solid var(--ac-line); margin-bottom: 10px; }
-  #ac-root .ac-brand small { display: block; color: var(--ac-accent); font-size: calc(10 * var(--ac-u)); font-weight: 600; letter-spacing: .06em; }
-  #ac-root .ac-brand b { font-size: calc(15 * var(--ac-u)); }
-  #ac-root .ac-brand sup { color: var(--ac-accent); font-size: calc(9 * var(--ac-u)); font-weight: 600; margin-left: 2px; }
-  #ac-root .ac-brand div { color: var(--ac-text2); font-size: calc(11 * var(--ac-u)); margin-top: 2px; }
-  #ac-root .ac-steps { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-  #ac-root .ac-stepbtn { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 9px; border: 0; background: transparent;
-    color: var(--ac-text2); font: inherit; text-align: left; cursor: pointer; }
-  #ac-root .ac-stepbtn:disabled { cursor: default; opacity: .55; }
-  #ac-root .ac-stepbtn i { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-    font-style: normal; font-size: calc(11 * var(--ac-u)); background: var(--ac-line); color: var(--ac-text2); }
-  #ac-root .ac-stepbtn.ac-on { background: color-mix(in srgb, var(--ac-accent) 14%, transparent); color: var(--ac-text); font-weight: 600; }
-  #ac-root .ac-stepbtn.ac-on i, #ac-root .ac-stepbtn.ac-done i { background: var(--ac-accent); color: #fff; }
+  #ac-root .ac-brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px 16px; }
+  #ac-root .ac-brand img { width: 34px; height: 34px; border-radius: 9px; flex: none; background: var(--ac-bg); }
+  #ac-root .ac-brand b { display: block; font-size: calc(16 * var(--ac-u)); letter-spacing: -.01em; }
+  #ac-root .ac-brand span { display: block; color: var(--ac-text2); font-size: calc(11 * var(--ac-u)); margin-top: 1px; }
+  /* Steps as a progress rail: a line joins the step dots, filled up to the current step. */
+  #ac-root .ac-steps { display: flex; flex-direction: column; flex: 1; }
+  #ac-root .ac-stepbtn { position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 1px 10px; padding: 8px 8px 14px; border-radius: 9px;
+    background: transparent; color: var(--ac-text2); font: inherit; text-align: left; cursor: pointer; align-items: center; }
+  #ac-root .ac-stepbtn:disabled { cursor: default; opacity: .5; }
+  #ac-root .ac-stepbtn i { position: relative; z-index: 1; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-style: normal; font-size: calc(11 * var(--ac-u)); font-weight: 600; background: var(--ac-bg); border: 2px solid var(--ac-line); color: var(--ac-text2); }
+  #ac-root .ac-stepbtn:not(:last-child)::after { content: ''; position: absolute; left: 18px; top: 32px; bottom: -8px; width: 2px; background: var(--ac-line); }
+  #ac-root .ac-stepbtn.ac-done::after { background: var(--ac-accent); }
+  #ac-root .ac-stepbtn span { font-weight: 600; color: var(--ac-text); }
+  #ac-root .ac-stepbtn small { grid-column: 2; font-size: calc(11 * var(--ac-u)); color: var(--ac-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ac-root .ac-stepbtn.ac-on { background: color-mix(in srgb, var(--ac-accent) 12%, transparent); }
+  #ac-root .ac-stepbtn.ac-on i { border-color: var(--ac-accent); color: var(--ac-accent); }
+  #ac-root .ac-stepbtn.ac-done i { background: var(--ac-accent); border-color: var(--ac-accent); color: #fff; }
   #ac-root .ac-btn { border: 1px solid var(--ac-line); background: var(--ac-bg); color: var(--ac-text); border-radius: 8px; padding: 8px 14px;
     font: inherit; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
   #ac-root .ac-btn:disabled { opacity: .45; cursor: default; }
   #ac-root .ac-btn.ac-primary { background: var(--ac-accent); border-color: var(--ac-accent); color: #fff; }
   #ac-root .ac-btn.ac-small { padding: 4px 10px; font-size: calc(12 * var(--ac-u)); }
   #ac-root .ac-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  #ac-root .ac-head { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px 10px; }
+  #ac-root .ac-head { display: flex; align-items: flex-start; gap: 10px; padding: 16px 20px 10px; }
   #ac-root .ac-head h1 { margin: 0; font-size: calc(20 * var(--ac-u)); font-weight: 600; }
   #ac-root .ac-head p { margin: 4px 0 0; color: var(--ac-text2); }
-  #ac-root .ac-conn { margin-left: auto; font-size: calc(11 * var(--ac-u)); padding: 4px 10px; border-radius: 20px; background: var(--ac-soft); color: var(--ac-text2); white-space: nowrap; }
+  #ac-root .ac-iconbtn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--ac-line); display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ac-text2); cursor: pointer; flex: none; transition: background-color .12s, border-color .12s, color .12s; }
+  #ac-root .ac-iconbtn:hover { border-color: #e5484d; color: #e5484d; background: color-mix(in srgb, #e5484d 10%, transparent); }
+  #ac-root .ac-conn { margin-left: auto; align-self: center; font-size: calc(11 * var(--ac-u)); padding: 4px 10px; border-radius: 20px; background: var(--ac-soft); color: var(--ac-text2); white-space: nowrap; }
   #ac-root .ac-conn::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #9ca3af; margin-right: 6px; }
   #ac-root .ac-conn.ac-yes::before { background: var(--ac-ok); }
   #ac-root .ac-body { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) clamp(320px, 25vw, 480px); gap: 14px; padding: 4px 20px 14px; }
-  /* The plan step: operations on the left, the 3D view on the right. */
-  #ac-root .ac-body.ac-plan { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
-  #ac-root .ac-body.ac-plan .ac-panel { order: -1; }
   #ac-root .ac-viewer { position: relative; border-radius: 12px; background: radial-gradient(ellipse at 50% 40%, var(--ac-bg), var(--ac-soft)); border: 1px solid var(--ac-line);
     min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
-  #ac-root .ac-vhead { display: flex; align-items: center; gap: 10px; padding: 10px 12px; z-index: 2; }
-  #ac-root .ac-vhead .ac-fileicon { width: 30px; height: 30px; border-radius: 8px; background: var(--ac-soft); border: 1px solid var(--ac-line); display: flex; align-items: center; justify-content: center; color: var(--ac-accent); }
-  #ac-root .ac-vhead b { display: block; font-size: calc(13 * var(--ac-u)); }
-  #ac-root .ac-vhead span { font-family: ui-monospace, monospace; font-size: calc(11 * var(--ac-u)); color: var(--ac-text2); }
-  #ac-root .ac-vhead .ac-btn { margin-left: auto; }
   #ac-root .ac-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
-  #ac-root .ac-chips { position: absolute; top: 56px; right: 12px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 2; }
-  #ac-root .ac-chip { background: var(--ac-bg); border: 1px solid var(--ac-line); border-radius: 8px; padding: 3px 8px; font-size: calc(11 * var(--ac-u)); display: inline-flex; align-items: center; gap: 6px; }
-  #ac-root .ac-chip i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
-  #ac-root .ac-hints { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 6px; z-index: 2; flex-wrap: wrap; }
-  #ac-root .ac-tabs { position: absolute; top: 56px; left: 12px; display: flex; gap: 6px; z-index: 2; }
+  #ac-root .ac-hints { position: absolute; left: 12px; bottom: 12px; z-index: 2; font-size: calc(11 * var(--ac-u)); color: var(--ac-text2);
+    background: color-mix(in srgb, var(--ac-bg) 80%, transparent); border-radius: 6px; padding: 4px 8px; }
+  #ac-root .ac-tabs { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; z-index: 2; }
   #ac-root .ac-tab { border: 1px solid var(--ac-line); background: var(--ac-bg); color: var(--ac-text2); border-radius: 8px; padding: 5px 12px; font: inherit; font-size: calc(12 * var(--ac-u)); cursor: pointer; }
   #ac-root .ac-tab.ac-on { border-color: var(--ac-accent); color: var(--ac-text); box-shadow: 0 0 0 1px var(--ac-accent) inset; }
-  #ac-root .ac-drop { position: absolute; inset: 56px 12px 12px; border: 2px dashed var(--ac-line); border-radius: 12px; display: flex; flex-direction: column;
+  #ac-root .ac-drop { position: absolute; inset: 12px; border: 2px dashed var(--ac-line); border-radius: 12px; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 8px; color: var(--ac-text2); z-index: 3; background: color-mix(in srgb, var(--ac-bg) 70%, transparent); text-align: center; }
   #ac-root .ac-drop.ac-over { border-color: var(--ac-accent); color: var(--ac-text); }
   #ac-root .ac-drop b { color: var(--ac-text); font-size: calc(15 * var(--ac-u)); }
@@ -79,15 +77,7 @@
   #ac-root .ac-card { background: var(--ac-soft); border-radius: 12px; padding: 12px 14px; }
   #ac-root .ac-card h4 { margin: 0 0 10px; font-size: calc(11 * var(--ac-u)); font-weight: 600; letter-spacing: .06em; color: var(--ac-text2); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
   #ac-root .ac-card h4 .ac-btn { margin-left: auto; text-transform: none; letter-spacing: 0; }
-  #ac-root .ac-sides { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  #ac-root .ac-sidebtn { border: 1px solid var(--ac-line); background: var(--ac-bg); color: var(--ac-text); border-radius: 9px; padding: 8px 4px; font: inherit;
     display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
-  #ac-root .ac-sidebtn svg { width: 18px; height: 18px; color: var(--ac-text2); }
-  #ac-root .ac-sidebtn small { font-size: calc(10 * var(--ac-u)); color: var(--ac-text2); }
-  #ac-root .ac-sidebtn.ac-on { border-color: var(--ac-accent); box-shadow: 0 0 0 1px var(--ac-accent) inset; }
-  #ac-root .ac-sidebtn.ac-on svg { color: var(--ac-accent); }
-  #ac-root .ac-sidebtn.ac-no { color: var(--ac-text2); }
-  #ac-root .ac-sidebtn small.ac-best { color: var(--ac-ok); font-weight: 600; }
   #ac-root .ac-hint { color: var(--ac-text2); font-size: calc(12 * var(--ac-u)); margin-top: 8px; }
   #ac-root .ac-found { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
   #ac-root .ac-found li { display: flex; align-items: center; gap: 8px; }
@@ -123,16 +113,15 @@
   #ac-root .ac-total { display: flex; justify-content: space-between; font-weight: 600; margin-top: 8px; }
   #ac-root .ac-foot { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--ac-line); }
   #ac-root .ac-foot .ac-status { flex: 1; color: var(--ac-text2); font-size: calc(12 * var(--ac-u)); }
-  #ac-root .ac-close { width: 100%; }
   /* Hover, pressed and keyboard focus for everything clickable. */
-  #ac-root .ac-btn, #ac-root .ac-stepbtn, #ac-root .ac-tab, #ac-root .ac-sidebtn, #ac-root .ac-seg button, #ac-root .ac-opt, #ac-root .ac-mat, #ac-root .ac-zgrid button {
+  #ac-root .ac-btn, #ac-root .ac-stepbtn, #ac-root .ac-tab, #ac-root .ac-siderow, #ac-root .ac-seg button, #ac-root .ac-opt, #ac-root .ac-zgrid button {
     transition: background-color .12s, border-color .12s, filter .12s, transform .05s; }
   #ac-root .ac-btn:hover:not(:disabled) { border-color: var(--ac-accent); background: color-mix(in srgb, var(--ac-accent) 12%, var(--ac-bg)); }
   #ac-root .ac-btn.ac-primary:hover:not(:disabled) { background: var(--ac-accent); filter: brightness(1.12); }
-  #ac-root .ac-btn:active:not(:disabled), #ac-root .ac-sidebtn:active, #ac-root .ac-tab:active, #ac-root .ac-seg button:active:not(:disabled) { transform: translateY(1px); filter: brightness(0.95); }
+  #ac-root .ac-btn:active:not(:disabled), #ac-root .ac-siderow:active, #ac-root .ac-tab:active, #ac-root .ac-seg button:active:not(:disabled) { transform: translateY(1px); filter: brightness(0.95); }
   #ac-root .ac-btn:disabled, #ac-root .ac-seg button:disabled { cursor: not-allowed; }
   #ac-root .ac-stepbtn:hover:not(:disabled):not(.ac-on) { background: color-mix(in srgb, var(--ac-accent) 8%, transparent); color: var(--ac-text); }
-  #ac-root .ac-tab:hover:not(.ac-on), #ac-root .ac-sidebtn:hover:not(.ac-on), #ac-root .ac-opt:hover:not(.ac-on) { border-color: color-mix(in srgb, var(--ac-accent) 60%, var(--ac-line)); }
+  #ac-root .ac-tab:hover:not(.ac-on), #ac-root .ac-siderow:hover:not(.ac-on), #ac-root .ac-opt:hover:not(.ac-on) { border-color: color-mix(in srgb, var(--ac-accent) 60%, var(--ac-line)); }
   #ac-root .ac-seg button:hover:not(.ac-on):not(:disabled) { background: color-mix(in srgb, var(--ac-accent) 12%, var(--ac-bg)); color: var(--ac-text); }
   #ac-root button:focus-visible, #ac-root .ac-opt:focus-within, #ac-root select:focus-visible, #ac-root input:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
   #ac-root .ac-play { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 10px;
@@ -163,41 +152,52 @@
   #ac-root .ac-verdict { font-weight: 600; margin-bottom: 8px; display: flex; gap: 6px; align-items: center; }
   #ac-root .ac-override { display: flex; gap: 8px; align-items: flex-start; margin-top: 8px; font-size: calc(12 * var(--ac-u)); }
   #ac-root .ac-hidden { display: none !important; }
+  /* Part file */
+  #ac-root .ac-file { display: flex; align-items: center; gap: 10px; }
+  #ac-root .ac-file div { min-width: 0; flex: 1; }
+  #ac-root .ac-file b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ac-root .ac-file span { font-family: ui-monospace, monospace; font-size: calc(11.5 * var(--ac-u)); color: var(--ac-text2); }
+  /* Side to face up: a list with a reach badge per side */
+  #ac-root .ac-sidelist { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  #ac-root .ac-siderow { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid var(--ac-line); border-radius: 8px; background: var(--ac-bg); cursor: pointer; text-align: left; }
+  #ac-root .ac-siderow span { flex: 1; font-weight: 500; }
+  #ac-root .ac-siderow em { font-style: normal; font-size: calc(10.5 * var(--ac-u)); padding: 1px 6px; border-radius: 9px; background: var(--ac-soft); color: var(--ac-text2); white-space: nowrap; }
+  #ac-root .ac-siderow em.ac-best { background: color-mix(in srgb, var(--ac-ok) 18%, transparent); color: var(--ac-ok); font-weight: 600; }
+  #ac-root .ac-siderow em.ac-two { color: var(--ac-warn); }
+  #ac-root .ac-siderow.ac-on { border-color: var(--ac-accent); box-shadow: 0 0 0 1px var(--ac-accent) inset; }
+  #ac-root .ac-siderow:hover:not(.ac-on) { border-color: color-mix(in srgb, var(--ac-accent) 60%, var(--ac-line)); }
+  #ac-root .ac-why { margin-top: 8px; font-size: calc(12 * var(--ac-u)); color: var(--ac-text2); }
+  /* Material: option list with a colour dot */
+  #ac-root .ac-opts.ac-two { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  #ac-root .ac-opt > i { width: 14px; height: 14px; border-radius: 50%; flex: none; margin-top: 2px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+  #ac-root button.ac-opt { text-align: left; width: 100%; }
+  /* Operations: the machining sequence, each with its share of the job time */
+  #ac-root .ac-budget { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--ac-line); margin: 4px 0 6px; }
+  #ac-root .ac-budget i { display: block; height: 100%; }
+  #ac-root .ac-budget-head { display: flex; justify-content: space-between; align-items: baseline; }
+  #ac-root .ac-budget-head b { font-size: calc(22 * var(--ac-u)); font-variant-numeric: tabular-nums; }
+  #ac-root .ac-seq { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  #ac-root .ac-seq li { display: grid; grid-template-columns: 18px 20px minmax(0, 1fr) auto; gap: 5px 8px; align-items: center; background: var(--ac-bg); border-radius: 9px; padding: 8px 10px; }
+  #ac-root .ac-seq li.ac-off { opacity: .55; }
+  #ac-root .ac-seq li > input { margin: 0; accent-color: var(--ac-accent); width: 15px; height: 15px; }
+  #ac-root .ac-seq li > em { width: 20px; height: 20px; border-radius: 6px; font-style: normal; font-size: calc(11 * var(--ac-u)); font-weight: 700; color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+  #ac-root .ac-seq li > b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #ac-root .ac-seq li > time { font-size: calc(12 * var(--ac-u)); color: var(--ac-text2); font-variant-numeric: tabular-nums; }
+  #ac-root .ac-seq .ac-seqmore { grid-column: 3 / -1; display: flex; gap: 8px; align-items: center; min-width: 0; font-size: calc(11.5 * var(--ac-u)); color: var(--ac-text2); }
+  #ac-root .ac-seq .ac-seqmore select { width: auto; max-width: 62%; padding: 3px 6px; font-size: calc(11.5 * var(--ac-u)); }
+  #ac-root .ac-seq .ac-seqmore span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #ac-root .ac-seq .ac-share { grid-column: 3 / -1; height: 3px; border-radius: 2px; background: var(--ac-line); overflow: hidden; }
+  #ac-root .ac-seq .ac-share i { display: block; height: 100%; }
+  #ac-root .ac-cutdata { margin-top: 8px; font-family: ui-monospace, monospace; font-size: calc(11.5 * var(--ac-u)); color: var(--ac-text2); }
   /* Material cards */
-  #ac-root .ac-mats { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; }
-  #ac-root .ac-mat { border: 1px solid var(--ac-line); background: var(--ac-bg); border-radius: 10px; padding: 8px 6px 7px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; text-align: center; }
-  #ac-root .ac-mat i { width: 26px; height: 26px; border-radius: 7px; margin-bottom: 3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
-  #ac-root .ac-mat span { font-weight: 600; }
-  #ac-root .ac-mat small { font-size: calc(10.5 * var(--ac-u)); color: var(--ac-text2); }
-  #ac-root .ac-mat.ac-on { border-color: var(--ac-accent); box-shadow: 0 0 0 1px var(--ac-accent) inset; background: color-mix(in srgb, var(--ac-accent) 10%, var(--ac-bg)); }
-  #ac-root .ac-mat:hover:not(.ac-on) { border-color: color-mix(in srgb, var(--ac-accent) 60%, var(--ac-line)); }
   /* Zero picker: the stock top seen from above, 3 x 3 points */
-  #ac-root .ac-zero { display: flex; gap: 12px; align-items: center; padding-bottom: 18px; }
+  #ac-root .ac-zero { display: flex; gap: 12px; align-items: center; padding-bottom: 18px; margin-bottom: 8px; }
   #ac-root .ac-zgrid { position: relative; width: 112px; height: 76px; flex: none; border: 1.5px solid var(--ac-text2); border-radius: 4px; background: color-mix(in srgb, var(--ac-text2) 8%, transparent); }
   #ac-root .ac-zgrid button { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--ac-bg); border: 1.5px solid var(--ac-text2); cursor: pointer; }
   #ac-root .ac-zgrid button:hover { border-color: var(--ac-accent); }
   #ac-root .ac-zgrid button.ac-on { background: var(--ac-accent); border-color: var(--ac-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac-accent) 30%, transparent); }
   #ac-root .ac-zgrid em { position: absolute; left: 0; right: 0; bottom: -17px; text-align: center; font-style: normal; font-size: calc(10 * var(--ac-u)); color: var(--ac-text2); }
-  #ac-root .ac-seg.ac-full { display: flex; width: 100%; margin-top: 10px; }
-  #ac-root .ac-seg.ac-full button { flex: 1; padding: 6px 8px; }
   /* Plan rows: one per operation */
-  #ac-root .ac-oprows { display: flex; flex-direction: column; gap: 6px; }
-  #ac-root .ac-oprow { display: grid; grid-template-columns: 32px minmax(0, 1fr) minmax(150px, 0.9fr) 40px; gap: 10px; align-items: center; background: var(--ac-soft); border-radius: 10px; padding: 9px 12px; }
-  #ac-root .ac-oprow.ac-off { opacity: .55; }
-  #ac-root .ac-opicon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; }
-  #ac-root .ac-opicon svg { width: 17px; height: 17px; }
-  #ac-root .ac-oprow b { display: block; font-weight: 600; }
-  #ac-root .ac-oprow small { display: block; color: var(--ac-text2); font-size: calc(11.5 * var(--ac-u)); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #ac-root .ac-oprow .ac-optool { font-size: calc(12 * var(--ac-u)); color: var(--ac-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #ac-root .ac-switch { position: relative; width: 36px; height: 20px; flex: none; }
-  #ac-root .ac-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
-  #ac-root .ac-switch input:disabled { cursor: default; }
-  #ac-root .ac-switch span { position: absolute; inset: 0; border-radius: 10px; background: var(--ac-line); transition: background-color .15s; }
-  #ac-root .ac-switch span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
-  #ac-root .ac-switch input:checked + span { background: var(--ac-accent); }
-  #ac-root .ac-switch input:checked + span::after { transform: translateX(16px); }
-  #ac-root .ac-switch input:disabled + span { opacity: .6; }
-  #ac-root .ac-switch input:focus-visible + span { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
   #ac-root .ac-planbusy { display: flex; gap: 10px; align-items: center; color: var(--ac-text2); padding: 10px 2px; }
   #ac-root details.ac-card > summary { cursor: pointer; list-style: none; }
   #ac-root details.ac-card > summary::-webkit-details-marker { display: none; }
@@ -207,8 +207,6 @@
   #ac-root details.ac-card[open] > summary { margin-bottom: 10px; }
   #ac-root .ac-scrollx { overflow-x: auto; }
   #ac-root .ac-scrollx .ac-tools { min-width: 640px; }
-  #ac-root .ac-finish-info { margin-top: 10px; font-size: calc(12 * var(--ac-u)); color: var(--ac-text2); }
-  #ac-root .ac-finish-info code { display: block; margin-top: 6px; font-family: ui-monospace, monospace; font-size: calc(11.5 * var(--ac-u)); line-height: 1.6; color: var(--ac-text); }
   #ac-root .ac-place { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 0; font-size: calc(12 * var(--ac-u)); }
   #ac-root .ac-place dt { color: var(--ac-text2); }
   #ac-root .ac-place dd { margin: 0; font-weight: 600; }
@@ -224,37 +222,28 @@
     #ac-root.ac-wrap { grid-template-columns: 1fr; height: auto; max-height: 94vh; overflow-y: auto; }
     #ac-root .ac-side { flex-direction: row; flex-wrap: wrap; align-items: center; }
     #ac-root .ac-steps { flex-direction: row; }
-    #ac-root .ac-body, #ac-root .ac-body.ac-plan { grid-template-columns: 1fr; }
-    #ac-root .ac-body.ac-plan .ac-panel { order: 0; }
-    #ac-root .ac-oprow { grid-template-columns: 32px minmax(0, 1fr) 40px; }
-    #ac-root .ac-oprow .ac-optool, #ac-root .ac-oprow select { grid-column: 2; }
+    #ac-root .ac-body { grid-template-columns: 1fr; }
     #ac-root .ac-viewer { min-height: 360px; }
   }
 </style>
 
 <div class="ac-wrap" id="ac-root">
   <aside class="ac-side">
-    <div class="ac-brand"><small>PLUGIN</small><b>AutoCAM</b><sup>BETA</sup><div>STEP file to G-code</div></div>
+    <div class="ac-brand"><img id="ac-logo" alt=""><div><b>AutoCAM</b><span id="ac-ver">STEP → G-code for ncSender</span></div></div>
     <nav class="ac-steps" id="ac-steps"></nav>
-    <button class="ac-btn ac-primary ac-close" id="ac-close">✕&nbsp; Close</button>
   </aside>
 
   <section class="ac-main">
     <header class="ac-head">
       <div><h1 id="ac-title">Your part</h1><p id="ac-sub"></p></div>
       <span class="ac-conn" id="ac-conn">Checking…</span>
+      <button class="ac-iconbtn" id="ac-close" title="Close AutoCAM" aria-label="Close AutoCAM"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </header>
 
     <div class="ac-body" id="ac-body">
       <div class="ac-viewer" id="ac-viewer">
         <canvas class="ac-canvas" id="ac-canvas" tabindex="0"></canvas>
-        <div class="ac-vhead ac-hidden" id="ac-vhead">
-          <div class="ac-fileicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg></div>
-          <div><b id="ac-fname"></b><span id="ac-fsize"></span></div>
-          <button class="ac-btn ac-small" id="ac-open2">Open another file</button>
-        </div>
         <div class="ac-tabs ac-hidden" id="ac-tabs"></div>
-        <div class="ac-chips ac-hidden" id="ac-chips"></div>
         <div class="ac-play ac-hidden" id="ac-play">
           <div class="ac-seg"><button data-mode="paths">Toolpaths</button><button data-mode="sim">Simulation</button></div>
           <button class="ac-btn ac-pbtn" id="ac-pbtn" title="Play / pause">▶</button>
@@ -262,7 +251,7 @@
           <div class="ac-track"><div class="ac-segs" id="ac-segs"></div><input type="range" id="ac-slider" min="0" max="90" value="90"></div>
           <span class="ac-plabel" id="ac-plabel"></span>
         </div>
-        <div class="ac-hints ac-hidden" id="ac-hints"><span class="ac-chip">Drag to rotate</span><span class="ac-chip">Scroll to zoom</span><span class="ac-chip" id="ac-hint3">Click a face to put it on top</span></div>
+        <div class="ac-hints ac-hidden" id="ac-hints"></div>
         <div class="ac-drop" id="ac-drop">
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg>
           <b>Drop a STEP file here</b><span>.step / .stp in millimetres</span>
@@ -299,10 +288,10 @@
 
   var COLORS = ['#3b82f6', '#ef6c35', '#22a06b', '#a855f7', '#d4a017', '#e5484d', '#0ea5b7', '#8b5cf6'];
   var STEPS = [
-    { title: 'Your part', sub: 'Drop a STEP file. AutoCAM finds the pockets, holes and outline for you.', short: 'Model' },
-    { title: 'What are you cutting it from?', sub: 'Pick the material and the stock block, then where G54 zero goes. AutoCAM sets the speeds, feeds and depth of each pass.', short: 'Stock & Zero' },
-    { title: 'Here’s the plan', sub: 'Tools are picked from the tools loaded in ncSender. Change any of them, or just continue.', short: 'Operations' },
-    { title: 'Ready to cut', sub: 'Watch the cut play through and check the results. When it looks right, load it.', short: 'Preview & Load' }
+    { title: 'Part', sub: 'Open a STEP file and choose the side that faces up. AutoCAM picks out the pockets, holes and outline.', short: 'Part' },
+    { title: 'Stock & zero', sub: 'The material, the block you cut it from, and where G54 zero sits on that block.', short: 'Stock & zero' },
+    { title: 'Operations', sub: 'The machining sequence, using the tools loaded in ncSender. Change a tool or switch a step off; the plan updates as you go.', short: 'Operations' },
+    { title: 'Simulate & load', sub: 'Run the simulation, read the checks, then send the program to ncSender.', short: 'Simulate & load' }
   ];
   // Zero points on the stock, [x share, y share] from the front-left corner (the engine has the same table).
   var AUTOCAM_ORIGINS = {
@@ -317,23 +306,19 @@
   };
   // Finish presets: allowance left for the finishing pass, contour step on slopes, and whether the pass runs at all.
   var FINISH = {
-    fast: { label: 'Fast', leave: 0, slopeStep: 0, off: true, text: 'No finishing pass: clearing cuts straight to size. Quickest; walls show the step-downs.' },
-    balanced: { label: 'Balanced', leave: 0.2, slopeStep: 0.5, off: false, text: 'Leaves 0.2 mm on the walls, then a clean finishing pass.' },
-    smooth: { label: 'Smooth', leave: 0.3, slopeStep: 0.2, off: false, text: 'Leaves 0.3 mm, then a finishing pass with 0.2 mm steps on slopes and curves. Slowest, best walls.' }
+    fast: { label: 'Quick', leave: 0, slopeStep: 0, off: true, text: 'No finishing pass: roughing cuts the walls to size. Walls show the step-downs.' },
+    balanced: { label: 'Standard', leave: 0.2, slopeStep: 0.5, off: false, text: 'Roughing leaves 0.2 mm on the walls; a finishing pass takes it off.' },
+    smooth: { label: 'Fine', leave: 0.3, slopeStep: 0.2, off: false, text: '0.3 mm left for finishing, and 0.2 mm steps on slopes and curves. Best walls, longest run.' }
   };
   function finishPreset() {
     var off = !!cfg.opsOff.finish;
     return Object.keys(FINISH).filter(function (k) { var f = FINISH[k]; return f.off === off && Math.abs(f.leave - cfg.leave) < 1e-6 && Math.abs(f.slopeStep - cfg.slopeStep) < 1e-6; })[0] || null;
   }
-  // The plan step's rows: operation key, plain name, icon colour, icon.
-  var OPROWS = [
-    ['face', 'Flatten the top', '#64748b', '<path d="M4 8h16M4 12h16M4 16h16"/>'],
-    ['rough', 'Clear the material', '#22a06b', '<path d="M4 6h5v5h5v5h6"/>'],
-    ['rest', 'Clean out corners', '#0ea5b7', '<path d="M6 4v14h14"/><path d="M10 8v6h6"/>'],
-    ['finish', 'Finish the walls', '#3b82f6', '<rect x="5" y="5" width="14" height="14" rx="3"/>'],
-    ['spot', 'Spot the holes', '#d4a017', '<path d="M6 6l6 12 6-12"/>'],
-    ['drill', 'Drill the holes', '#a855f7', '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/>']
-  ];
+  // Operations by key: name when switched off, and the colour of its number in the sequence.
+  var OPKEYS = {
+    face: ['Face the top', '#64748b'], rough: ['Rough out', '#22a06b'], rest: ['Clean up corners', '#0ea5b7'],
+    finish: ['Finish walls and corners', '#3b82f6'], spot: ['Spot drill', '#d4a017'], drill: ['Drill holes', '#a855f7']
+  };
   var SIDES = [['+Z', 'Top'], ['-Z', 'Bottom'], ['-Y', 'Front'], ['+Y', 'Back'], ['-X', 'Left'], ['+X', 'Right']];
 
   var cfg = Object.assign({
@@ -343,7 +328,7 @@
   }, initialConfig || {});
   if (!AUTOCAM_ORIGINS[cfg.origin]) cfg.origin = 'front-left';
   var state = {
-    step: 0, maxStep: 0, source: null, fileName: '', up: cfg.up, yaw: cfg.yaw || 0, picked: false, analysis: null, sides: {}, sides2: {}, sideBox: {}, ncTools: [], spindleTool: 0, live: null,
+    step: 0, maxStep: 0, machineReady: Promise.resolve(), source: null, fileName: '', up: cfg.up, yaw: cfg.yaw || 0, picked: false, analysis: null, sides: {}, sides2: {}, sideBox: {}, ncTools: [], spindleTool: 0, live: null,
     plans: [], gcodes: [], active: 0, hidden: {}, connected: null, numbering: 'slot',
     sims: [], uiChecks: [], override: {}, simMode: 'paths', frame: null, playing: null, fw: {}
   };
@@ -593,18 +578,19 @@
     var T = window.__autocamTHREE, w = st.x1 - st.x0, d = st.y1 - st.y0, z = cfg.zZero === 'bed' ? st.z0 : st.z1;
     var r = Math.max(0.8, Math.min(4, Math.max(w, d) * 0.022));
     V.zeroPts = [];
+    // Flat target marks on the stock face: a ring with a cross; the chosen one filled. The disc under each is the click target.
     Object.keys(AUTOCAM_ORIGINS).forEach(function (name) {
-      var a = AUTOCAM_ORIGINS[name], on = name === cfg.origin;
-      var m = new T.Mesh(new T.SphereGeometry(on ? r * 1.25 : r, 20, 14), new T.MeshBasicMaterial({ color: on ? 0x3b82f6 : 0xffffff }));
-      m.position.set(st.x0 + w * a[0], st.y0 + d * a[1], z);
-      m.userData.origin = name;
-      V.overlay.add(m);
-      V.zeroPts.push(m);
-      if (!on) {
-        var ring = new T.Mesh(new T.RingGeometry(r * 1.0, r * 1.25, 24), new T.MeshBasicMaterial({ color: 0x64748b, side: T.DoubleSide }));
-        ring.position.copy(m.position); ring.position.z += 0.01;
-        V.overlay.add(ring);
-      }
+      var a = AUTOCAM_ORIGINS[name], on = name === cfg.origin, x = st.x0 + w * a[0], y = st.y0 + d * a[1], zz = z + (cfg.zZero === 'bed' ? -0.02 : 0.02);
+      var hit = new T.Mesh(new T.CircleGeometry(r * 1.4, 28), new T.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: on ? 0.9 : 0.12, side: T.DoubleSide, depthWrite: false }));
+      hit.position.set(x, y, zz);
+      hit.userData.origin = name;
+      V.overlay.add(hit);
+      V.zeroPts.push(hit);
+      var ring = new T.Mesh(new T.RingGeometry(r * 1.15, r * 1.4, 32), new T.MeshBasicMaterial({ color: on ? 0x3b82f6 : 0x94a3b8, side: T.DoubleSide }));
+      ring.position.set(x, y, zz);
+      V.overlay.add(ring);
+      var cross = new T.BufferGeometry().setFromPoints([new T.Vector3(x - r * 0.8, y, zz), new T.Vector3(x + r * 0.8, y, zz), new T.Vector3(x, y - r * 0.8, zz), new T.Vector3(x, y + r * 0.8, zz)]);
+      V.overlay.add(new T.LineSegments(cross, new T.LineBasicMaterial({ color: on ? 0xffffff : 0x94a3b8 })));
     });
     var at = AUTOCAM_ORIGINS[cfg.origin];
     addZero(st.x0 + w * at[0], st.y0 + d * at[1], z, Math.max(8, w * 0.12));
@@ -816,8 +802,7 @@
       if (!V) initViewer();
       buildPart(null);
       $('ac-drop').classList.add('ac-hidden');
-      ['ac-vhead', 'ac-chips', 'ac-hints'].forEach(function (id) { $(id).classList.remove('ac-hidden'); });
-      $('ac-fname').textContent = file.name;
+
       await analyze(true);
       checkSides();
     } catch (e) {
@@ -835,7 +820,7 @@
       state.analysis = await call('analyze', { up: upMatrix() });
       buildPart(state.analysis.faceClass);
       var bb = state.analysis.bbox;
-      $('ac-fsize').textContent = fmt(bb[3] - bb[0]) + ' × ' + fmt(bb[4] - bb[1]) + ' × ' + fmt(bb[5] - bb[2]) + ' mm';
+      state.fsize = fmt(bb[3] - bb[0]) + ' × ' + fmt(bb[4] - bb[1]) + ' × ' + fmt(bb[5] - bb[2]) + ' mm';
       state.plans = []; state.gcodes = [];
       state.maxStep = Math.max(state.maxStep, 2);
       refreshScene(reframe);
@@ -860,18 +845,22 @@
       else if (m.partial) { state.sides[m.partial.side] = m.partial.hidden; state.sides2[m.partial.side] = m.partial.hidden2; state.sideBox[m.partial.side] = m.partial.bbox; if (state.step === 0) renderPanel(); }
       else if (m.id === 2) {
         w.terminate(); sidesWorker = null;
-        // Until the user picks a side, put the best one up, long side along the machine's long axis.
-        var best = bestSide(), two = needsTwoSetups(best);
-        if (!state.picked && best) {
-          var label = SIDES.filter(function (sd) { return sd[0] === best; })[0][1], msg = 'Turned the part: model ' + label.toLowerCase() + ' up, long side along ' + longAxis() + '.';
-          // No single side reaches everything, but turning it over does: switch to two setups, turned over about the long axis.
-          if (two && cfg.setups === '1') { cfg.setups = longAxis(); msg += ' Overhangs hide part of it from every side, so it is set to two setups, turned over.'; }
-          msg += ' Pick another side if you prefer.';
-          if (best !== state.up || longSideYaw(best) !== state.yaw) setUp(best).then(function () { setStatus(msg); });
-          else { saveSettings(); setStatus(msg); renderAll(); }
-        }
+        // The choice needs the Z travel and the tools' flute lengths: wait for them if the file came first.
+        state.machineReady.then(chooseSide);
       }
     };
+    function chooseSide() {
+      // Until the user picks a side, put the best one up, long side along the machine's long axis.
+      if (state.source !== source || state.picked) return;
+      var best = bestSide(), two = needsTwoSetups(best);
+      if (!best) return;
+      var label = SIDES.filter(function (sd) { return sd[0] === best; })[0][1], msg = 'Turned the part: model ' + label.toLowerCase() + ' up, long side along ' + longAxis() + '.';
+      // No single side reaches everything, but turning it over does: switch to two setups, turned over about the long axis.
+      if (two && cfg.setups === '1') { cfg.setups = longAxis(); msg += ' Overhangs hide part of it from every side, so it is set to two setups, turned over.'; }
+      msg += ' Pick another side if you prefer.';
+      if (best !== state.up || longSideYaw(best) !== state.yaw) setUp(best).then(function () { setStatus(msg); });
+      else { saveSettings(); setStatus(msg); renderAll(); }
+    }
     w.postMessage({ id: 1, type: 'load', meshes: source });
   }
 
@@ -1116,13 +1105,11 @@
     $('ac-sub').textContent = s.sub;
     $('ac-steps').innerHTML = STEPS.map(function (st, i) {
       return '<button class="ac-stepbtn' + (i === state.step ? ' ac-on' : i < state.step ? ' ac-done' : '') + '" data-step="' + i + '"' +
-        (i > state.maxStep ? ' disabled' : '') + '><i>' + (i + 1) + '</i>' + st.short + '</button>';
+        (i > state.maxStep ? ' disabled' : '') + '><i>' + (i < state.step ? '✓' : i + 1) + '</i><span>' + st.short + '</span><small>' + esc(stepSummary(i)) + '</small></button>';
     }).join('');
-    $('ac-body').classList.toggle('ac-plan', state.step === 2);
-    $('ac-hint3').classList.toggle('ac-hidden', state.step > 1);
-    $('ac-hint3').textContent = state.step === 1 ? 'Click a dot to put the zero there' : 'Click a face to put it on top';
-    $('ac-chips').classList.toggle('ac-hidden', !state.source || state.step !== 0);
-    $('ac-open2').classList.toggle('ac-hidden', state.step !== 0);
+    $('ac-hints').classList.toggle('ac-hidden', !state.source || state.step === 3);
+    $('ac-hints').textContent = 'Drag: rotate · Right-drag: pan · Scroll: zoom' +
+      (state.step === 0 ? ' · Click a flat face: put it on top' : state.step === 1 ? ' · Click a dot: put the zero there' : '');
     renderTabs();
     renderPanel();
     renderFooter();
@@ -1157,7 +1144,6 @@
     }).join('');
   }
 
-  var CUBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg>';
 
   function renderPanel() {
     var P = $('ac-panel');
@@ -1165,8 +1151,19 @@
     else if (state.step === 1) P.innerHTML = panelStock();
     else if (state.step === 2) P.innerHTML = panelOps();
     else P.innerHTML = panelPreview();
-    $('ac-chips').innerHTML = [['var(--ac-pocket)', 'Pockets'], ['var(--ac-hole)', 'Holes'], ['var(--ac-outline)', 'Outline']]
-      .map(function (c) { return '<span class="ac-chip"><i style="background:' + c[0] + '"></i>' + c[1] + '</span>'; }).join('');
+  }
+
+  /** One line under each step in the rail: what was chosen there. */
+  function stepSummary(i) {
+    if (i === 0) return state.fileName ? state.fileName.replace(/\.(step|stp)$/i, '') : 'No file open';
+    if (i === 1) {
+      var m = window.AutoCAM && AutoCAM.MATERIALS[cfg.material], st = state.analysis ? stockBox() : null;
+      return (m ? m.label.replace(/\s*\(.*\)$/, '') : '') + (st ? ' · ' + fmt(st.x1 - st.x0) + '×' + fmt(st.y1 - st.y0) + '×' + fmt(st.z1 - st.z0) : '');
+    }
+    var plans = state.plans.length ? state.plans : state.prevPlans || [];
+    if (i === 2) return plans.length ? plans.reduce(function (t, p) { return t + p.ops.length; }, 0) + ' steps · ' + fmtTime(plans.reduce(function (t, p) { return t + p.seconds; }, 0)) : 'Tools and finish';
+    var v = state.plans.length ? verdict(state.active) : null;
+    return !v ? 'Check, then load' : v.fails ? v.fails + ' problem' + (v.fails > 1 ? 's' : '') : v.warns ? 'Ready · ' + v.warns + ' warning' + (v.warns > 1 ? 's' : '') : 'All checks passed';
   }
 
   /** How the part sits on the table: what is up, what faces the operator, size along each machine axis. */
@@ -1191,16 +1188,17 @@
 
   function panelModel() {
     var best = bestSide();
-    var html = '<div class="ac-card"><h4>Which side faces up?</h4><div class="ac-sides">' + SIDES.map(function (s) {
+    var html = state.source ? '<div class="ac-card"><div class="ac-file"><div><b title="' + esc(state.fileName) + '">' + esc(state.fileName) + '</b><span>' + esc(state.fsize || '') + '</span></div>' +
+      '<button class="ac-btn ac-small" id="ac-open2">Open another…</button></div></div>' : '';
+    html += '<div class="ac-card"><h4>Which side faces up?</h4><div class="ac-sidelist">' + SIDES.map(function (s) {
       var h = state.sides[s[0]], on = state.up === s[0];
       var known = h !== undefined, u1 = known ? unreached(s[0], 1) : 1, u2 = known ? unreached(s[0], 2) : 1;
-      var status = !state.source ? '' : !known ? 'checking…' : s[0] === best ? (u1 <= 0.002 ? 'Best' : 'Best · 2 setups') :
-        u1 <= 0.002 ? 'Reachable' : u2 <= 0.002 ? '2 setups' : "Can't reach";
-      var title = known ? reachText(s[0]) : '';
-      return '<button class="ac-sidebtn' + (on ? ' ac-on' : '') + (h > 0.002 && s[0] !== best ? ' ac-no' : '') + '" data-up="' + s[0] + '" title="' + title + '">' + CUBE +
-        '<span>' + s[1] + '</span><small class="' + (s[0] === best ? 'ac-best' : '') + '">' + status + '</small></button>';
-    }).join('') + '</div><div class="ac-hint">' + (typeof state.up === 'string' ? 'Or click a flat face on the model to put it on top.'
-      : '<b>Custom:</b> the face you clicked is on top. Pick a side above to go back.') + '</div></div>';
+      var status = !state.source ? '' : !known ? '…' : s[0] === best ? 'best' : u1 <= 0.002 ? 'reachable' : u2 <= 0.002 ? '2 setups' : 'hidden areas';
+      var cls = s[0] === best ? 'ac-best' : u1 > 0.002 && u2 <= 0.002 ? 'ac-two' : '';
+      return '<button class="ac-siderow' + (on ? ' ac-on' : '') + '" data-up="' + s[0] + '" title="' + esc(known ? reachText(s[0]) : '') + '"><span>' + s[1] + '</span>' +
+        (status ? '<em class="' + cls + '">' + status + '</em>' : '') + '</button>';
+    }).join('') + '</div><div class="ac-why">' + (typeof state.up !== 'string' ? '<b>Custom:</b> the face you clicked is on top. Pick a side to go back.'
+      : state.sides[state.up] !== undefined && unreached(state.up, 1) <= 0.002 ? esc(reachText(state.up)) + '.' : 'Or click a flat face on the model to put it on top.') + '</div></div>';
     if (state.analysis) html += placementCard(0, false);
 
     if (state.analysis) {
@@ -1246,23 +1244,23 @@
     var st = state.analysis ? stockBox() : null;
     var mats = Object.keys(AutoCAM.MATERIALS).map(function (k) {
       var look = MAT_LOOK[k] || ['#9ca3af', ''], name = AutoCAM.MATERIALS[k].label.replace(/\s*\(.*\)$/, '');
-      return '<button class="ac-mat' + (k === cfg.material ? ' ac-on' : '') + '" data-material="' + k + '"><i style="background:' + look[0] + '"></i>' +
-        '<span>' + esc(name) + '</span><small>' + esc(look[1]) + '</small></button>';
+      return '<button class="ac-opt' + (k === cfg.material ? ' ac-on' : '') + '" data-material="' + k + '"><i style="background:' + look[0] + '"></i>' +
+        '<div><b>' + esc(name) + '</b><span>' + esc(look[1]) + '</span></div></button>';
     }).join('');
     var dots = Object.keys(AUTOCAM_ORIGINS).map(function (n) {
       var a = AUTOCAM_ORIGINS[n];
       return '<button class="' + (n === cfg.origin ? 'ac-on' : '') + '" data-origin="' + n + '" title="' + esc(AutoCAM.originText(n, cfg.zZero)) + '" style="left:' + (a[0] * 100) + '%;top:' + ((1 - a[1]) * 100) + '%"></button>';
     }).join('');
-    return '<div class="ac-card"><h4>Material</h4><div class="ac-mats">' + mats + '</div></div>' +
+    return '<div class="ac-card"><h4>Material</h4><div class="ac-opts ac-two">' + mats + '</div></div>' +
       '<div class="ac-card"><h4>Stock block</h4><div class="ac-fields">' +
       field('stockXY', 'Margin each side (mm)', 0.5) + field('stockTop', 'Above the part (mm)') +
       (twoSetups() ? field('stockBottom', 'Below the part (mm)') : '') + '</div>' +
       (st ? '<div class="ac-big">' + fmt(st.x1 - st.x0) + ' × ' + fmt(st.y1 - st.y0) + ' × ' + fmt(st.z1 - st.z0) + ' mm' +
         (st.margin > cfg.stockXY ? ' (margin ' + st.margin + ' mm for the frame)' : '') + '</div>' : '') + '</div>' +
-      '<div class="ac-card"><h4>Where is zero? (G54)</h4><div class="ac-zero"><div class="ac-zgrid">' + dots + '<em>front · you</em></div>' +
-      '<div><b>' + esc(zeroText()) + '</b><div class="ac-hint" style="margin-top:4px">Click a dot here or on the stock in the 3D view.</div></div></div>' +
-      '<div class="ac-seg ac-full"><button data-zzero="top" class="' + (cfg.zZero !== 'bed' ? 'ac-on' : '') + '">Z0 on stock top</button>' +
-      '<button data-zzero="bed" class="' + (cfg.zZero === 'bed' ? 'ac-on' : '') + '">Z0 on the bed</button></div></div>' +
+      '<div class="ac-card"><h4>Work zero (G54)</h4><div class="ac-zero"><div class="ac-zgrid">' + dots + '<em>front · you</em></div>' +
+      '<div><b>' + esc(zeroText()) + '</b><div class="ac-hint" style="margin-top:4px">X and Y: pick one of the nine points here or on the stock in the 3D view.</div></div></div>' +
+      '<div class="ac-opts">' + option('zzero', 'top', cfg.zZero === 'bed' ? 'bed' : 'top', 'Z on the stock top', 'Touch off on the top face of the block') +
+      option('zzero', 'bed', cfg.zZero === 'bed' ? 'bed' : 'top', 'Z on the spoilboard', 'Touch off on the table under the block; the block’s thickness then doesn’t matter') + '</div></div>' +
       '<div class="ac-card"><h4>Setups</h4><div class="ac-opts">' +
       option('setups', '1', cfg.setups, 'One setup', 'Machine everything from the top') +
       option('setups', 'X', cfg.setups, 'Two setups, turn over front to back', 'Flip about X; a frame and web hold the part') +
@@ -1272,53 +1270,65 @@
       '</div>';
   }
 
-  /** The plan as rows: one per kind of operation (both setups together), with its tool and an on/off switch. */
+  /** The machining sequence: one line per operation (both setups together), its tool, its share of the job time. */
   function planRows() {
     if (state.planError) return '<div class="ac-note ac-warn"><span>⚠</span><span>' + esc(state.planError) + '</span></div>';
     // While a change is re-planned, the previous plan stays on screen.
     var plans = state.plans.length ? state.plans : state.prevPlans || [], updating = state.planning || !state.plans.length;
-    if (!plans.length) return '<div class="ac-planbusy"><span class="ac-spin"></span>Working out the plan…</div>';
-    var tools = camTools(), two = plans.length > 1;
-    return '<div class="ac-oprows">' + OPROWS.map(function (row) {
-      var key = row[0], ops = [], setups = [];
-      plans.forEach(function (p, i) { p.ops.forEach(function (op) { if (op.key === key) { ops.push(op); if (setups.indexOf(i + 1) < 0) setups.push(i + 1); } }); });
-      var off = !!cfg.opsOff[key];
-      if (!ops.length && !off) return '';
-      var name = key === 'drill' && ops.length ? ops.map(function (o) { return o.name; }).filter(function (n, i, a) { return a.indexOf(n) === i; }).join(', ') : row[1];
-      var secs = ops.reduce(function (t, o) { return t + o.seconds; }, 0);
-      var sub = off ? 'Off' + (key === 'drill' ? ': holes are milled with end mills instead' : key === 'finish' ? ': clearing cuts the walls to size' : '')
-        : (ops[0] ? ops[0].cutting.rpm + ' rpm · F' + ops[0].cutting.feed + ' · ' : '') + fmtTime(secs) + (two ? ' · setup ' + setups.join(' + ') : '');
+    if (!plans.length) return '<div class="ac-card"><div class="ac-planbusy"><span class="ac-spin"></span>Working out the sequence…</div></div>';
+    var tools = camTools(), two = plans.length > 1, items = [];
+    plans.forEach(function (p, si) {
+      p.ops.forEach(function (op) {
+        var it = items.filter(function (x) { return x.name === op.name; })[0];
+        if (!it) items.push(it = { name: op.name, key: op.key, ops: [], setups: [] });
+        it.ops.push(op);
+        if (it.setups.indexOf(si + 1) < 0) it.setups.push(si + 1);
+      });
+    });
+    Object.keys(OPKEYS).forEach(function (k) { if (cfg.opsOff[k]) items.push({ name: OPKEYS[k][0], key: k, ops: [], setups: [], off: true }); });
+    var total = plans.reduce(function (t, p) { return t + p.seconds; }, 0);
+    var cutting = items.reduce(function (t, it) { return t + it.ops.reduce(function (u, o) { return u + o.seconds; }, 0); }, 0);
+    items.forEach(function (it) { it.secs = it.ops.reduce(function (u, o) { return u + o.seconds; }, 0); it.color = (OPKEYS[it.key] || ['', '#64748b'])[1]; });
+    var budget = '<div class="ac-card"><div class="ac-budget-head"><h4 style="margin:0">Job time' + (two ? ' · 2 setups' : '') + '</h4><b>' + fmtTime(total) + '</b></div>' +
+      '<div class="ac-budget">' + items.filter(function (it) { return it.secs > 0; }).map(function (it) {
+        return '<i title="' + esc(it.name + ': ' + fmtTime(it.secs)) + '" style="width:' + (it.secs / total * 100) + '%;background:' + it.color + '"></i>';
+      }).join('') + '</div><div class="ac-hint" style="margin:0">Cutting ' + fmtTime(cutting) + ' · tool changes and moves between them ' + fmtTime(Math.max(0, total - cutting)) + '</div></div>';
+    var n = 0;
+    var list = '<div class="ac-card"><h4>Sequence</h4><ol class="ac-seq">' + items.map(function (it) {
+      var key = it.key, off = !!it.off;
       var choose = key === 'face' ? tools.filter(function (t) { return t.kind === 'face' || t.kind === 'flat'; })
         : key === 'rough' || key === 'rest' ? tools.filter(function (t) { return t.kind === 'flat'; }) : null;
-      var toolCell;
+      var toolHtml;
       if (choose && !off) {
-        var cur = ops[0] ? ops[0].tool : null;
-        toolCell = '<select data-optool="' + key + '"><option value="">Auto' + (cur && !cfg.opTools[key] ? ': T' + cur.number + ' ' + esc(shortTool(cur.label)) : '') + '</option>' +
+        var cur = it.ops[0].tool;
+        toolHtml = '<select data-optool="' + key + '" title="Tool for this step"><option value="">Auto · T' + cur.number + ' ' + esc(shortTool(cur.label)) + '</option>' +
           choose.map(function (t) {
-            return '<option value="' + t.number + '"' + (Number(cfg.opTools[key]) === t.number ? ' selected' : '') + '>T' + t.number + ' · ' + esc(t.name || t.kind) + ' Ø' + t.diameter + '</option>';
+            return '<option value="' + t.number + '"' + (Number(cfg.opTools[key]) === t.number ? ' selected' : '') + '>T' + t.number + ' ' + esc(t.name || t.kind) + ' Ø' + t.diameter + '</option>';
           }).join('') + '</select>';
-      } else {
-        var labels = ops.map(function (o) { return 'T' + o.tool.number + ' ' + shortTool(o.tool.label); }).filter(function (n, i, a) { return a.indexOf(n) === i; });
-        toolCell = '<div class="ac-optool" title="' + esc(labels.join(', ')) + '">' + esc(labels.join(', ') || '—') + '</div>';
+        if (cfg.opTools[key]) toolHtml = toolHtml.replace('<option value="">Auto · T' + cur.number, '<option value="">Auto');
+      } else if (!off) {
+        var labels = it.ops.map(function (o) { return 'T' + o.tool.number + ' ' + shortTool(o.tool.label); }).filter(function (x, i, a) { return a.indexOf(x) === i; });
+        toolHtml = '<span title="' + esc(labels.join(', ')) + '">' + esc(labels.join(', ')) + '</span>';
       }
-      var sw = '<label class="ac-switch" title="' + (key === 'rough' ? 'Clearing always runs' : off ? 'Switch on' : 'Switch off') + '"><input type="checkbox" data-opoff="' + key + '"' +
-        (off ? '' : ' checked') + (key === 'rough' ? ' disabled' : '') + '><span></span></label>';
-      return '<div class="ac-oprow' + (off ? ' ac-off' : '') + '"><div class="ac-opicon" style="background:' + row[2] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + row[3] + '</svg></div>' +
-        '<div style="min-width:0"><b>' + esc(name) + '</b><small>' + esc(sub) + '</small></div>' + toolCell + sw + '</div>';
-    }).join('') + '</div>' + (updating ? '<div class="ac-planbusy"><span class="ac-spin"></span>Updating the plan…</div>' : '');
+      var meta = off ? (key === 'drill' ? 'Off: holes are milled instead' : key === 'finish' ? 'Off: roughing cuts the walls to size' : 'Off')
+        : it.ops[0].cutting.rpm.toLocaleString() + ' rpm · F' + it.ops[0].cutting.feed + (two ? ' · setup ' + it.setups.join('+') : '');
+      return '<li class="' + (off ? 'ac-off' : '') + '"><input type="checkbox" data-opoff="' + key + '"' + (off ? '' : ' checked') + (key === 'rough' ? ' disabled title="Roughing always runs"' : ' title="Include this step"') + '>' +
+        '<em style="background:' + it.color + '">' + (off ? '–' : ++n) + '</em><b title="' + esc(it.name) + '">' + esc(it.name) + '</b><time>' + (off ? '' : fmtTime(it.secs)) + '</time>' +
+        '<div class="ac-seqmore">' + (toolHtml || '') + '<span>' + esc(meta) + '</span></div>' +
+        (off ? '' : '<div class="ac-share"><i style="width:' + (it.secs / (cutting || 1) * 100) + '%;background:' + it.color + '"></i></div>') + '</li>';
+    }).join('') + '</ol>' + (updating ? '<div class="ac-planbusy"><span class="ac-spin"></span>Updating…</div>' : '') + '</div>';
+    return budget + list;
   }
 
   /** "T3 Down-Cut Spiral 1/4 6.3mm 37mm D6.3" -> "Down-Cut Spiral 1/4 6.3mm 37mm". */
   function shortTool(label) { return String(label).replace(/^T\d+\s*/, '').replace(/\s+D[\d.]+$/, ''); }
 
   function finishCard() {
-    var cur = finishPreset(), p = state.plans[0], rough = p && p.ops.filter(function (o) { return o.key === 'rough'; })[0];
-    var info = cur ? FINISH[cur].text : 'Custom: finish allowance ' + cfg.leave + ' mm, slope step ' + cfg.slopeStep + ' mm' + (cfg.opsOff.finish ? ', no finishing pass.' : '.');
-    var mat = AutoCAM.MATERIALS[cfg.material];
-    return '<div class="ac-card"><h4>Finish</h4><div class="ac-seg ac-full" style="margin-top:0">' + Object.keys(FINISH).map(function (k) {
-      return '<button data-finish="' + k + '" class="' + (k === cur ? 'ac-on' : '') + '">' + FINISH[k].label + '</button>';
-    }).join('') + '</div><div class="ac-finish-info">' + esc(info) + (rough ? '<code>' + esc(shortTool(rough.tool.label)) + '<br>' + esc(mat ? mat.label : cfg.material) + ' · ' +
-      rough.cutting.rpm.toLocaleString() + ' RPM<br>' + rough.cutting.feed + ' mm/min · ' + fmt(rough.tool.maxDoc || 0) + ' mm per pass</code>' : '') + '</div></div>';
+    var cur = finishPreset(), p = state.plans[0] || (state.prevPlans || [])[0], rough = p && p.ops.filter(function (o) { return o.key === 'rough'; })[0];
+    return '<div class="ac-card"><h4>Wall finish</h4><div class="ac-opts">' + Object.keys(FINISH).map(function (k) {
+      return option('finish', k, cur, FINISH[k].label, FINISH[k].text);
+    }).join('') + '</div>' + (cur ? '' : '<div class="ac-hint">Custom: ' + cfg.leave + ' mm allowance, ' + cfg.slopeStep + ' mm slope step' + (cfg.opsOff.finish ? ', no finishing pass' : '') + ' (set under Tool table and cutting values).</div>') +
+      (rough ? '<div class="ac-cutdata">Roughing: T' + rough.tool.number + ' · ' + rough.cutting.rpm.toLocaleString() + ' rpm · ' + rough.cutting.feed + ' mm/min · ' + fmt(rough.tool.maxDoc || 0) + ' mm deep per pass</div>' : '') + '</div>';
   }
 
   function panelOps() {
@@ -1449,7 +1459,6 @@
   function renderPlayBar() {
     var bar = $('ac-play'), sim = state.sims[state.active];
     bar.classList.toggle('ac-hidden', state.step !== 3 || !state.plans.length);
-    $('ac-hints').classList.toggle('ac-hidden', !state.source || state.step === 3);
     bar.querySelectorAll('[data-mode]').forEach(function (b) {
       b.classList.toggle('ac-on', b.dataset.mode === state.simMode);
       if (b.dataset.mode === 'sim') { b.disabled = !sim; b.textContent = sim ? 'Simulation' : 'Simulating…'; }
@@ -1717,7 +1726,6 @@
   // ------------------------------------------------------------------ events
   $('ac-close').addEventListener('click', close);
   $('ac-open').addEventListener('click', function () { $('ac-file').click(); });
-  $('ac-open2').addEventListener('click', function () { $('ac-file').click(); });
   $('ac-file').addEventListener('change', function (e) { openFile(e.target.files[0]); e.target.value = ''; });
   var viewer = $('ac-viewer');
   ['dragover', 'dragenter'].forEach(function (ev) { viewer.addEventListener(ev, function (e) { e.preventDefault(); $('ac-drop').classList.add('ac-over'); }); });
@@ -1756,19 +1764,11 @@
   });
   var panel = $('ac-panel');
   panel.addEventListener('click', function (e) {
+    if (e.target.closest('#ac-open2')) { $('ac-file').click(); return; }
     var mat = e.target.closest('[data-material]');
     if (mat) { cfg.material = mat.dataset.material; changed(); return; }
     var org = e.target.closest('[data-origin]');
     if (org) { setOrigin(org.dataset.origin); return; }
-    var zz = e.target.closest('[data-zzero]');
-    if (zz) { cfg.zZero = zz.dataset.zzero; changed(); return; }
-    var fin = e.target.closest('[data-finish]');
-    if (fin) {
-      var F = FINISH[fin.dataset.finish];
-      cfg.leave = F.leave; cfg.slopeStep = F.slopeStep;
-      cfg.opsOff = Object.assign({}, cfg.opsOff, { finish: F.off });
-      changed(); return;
-    }
     var side = e.target.closest('[data-up]');
     if (side) { state.picked = true; setUp(side.dataset.up); return; }
     if (e.target.closest('#ac-turn')) { turnOnTable(); return; }
@@ -1790,6 +1790,12 @@
       cfg.opsOff[el.dataset.opoff] = !el.checked;
     } else if (el.name === 'origin' || el.name === 'setups') {
       cfg[el.name] = el.value;
+    } else if (el.name === 'zzero') {
+      cfg.zZero = el.value;
+    } else if (el.name === 'finish') {
+      var F = FINISH[el.value];
+      cfg.leave = F.leave; cfg.slopeStep = F.slopeStep;
+      cfg.opsOff = Object.assign({}, cfg.opsOff, { finish: F.off });
     } else if (el.dataset.override !== undefined) {
       state.override[el.dataset.override] = el.checked;
       renderFooter();
@@ -1809,8 +1815,12 @@
   $('ac-segs').addEventListener('click', function (e) { e.stopPropagation(); });
 
   (async function init() {
+    $('ac-logo').src = fileUrl('logo.png');
+    fetchText('manifest.json').then(function (t) { $('ac-ver').textContent = 'STEP → G-code · v' + JSON.parse(t).version; }).catch(function () {});
     renderAll();
-    await readMachine();
+    var machine = readMachine();
+    state.machineReady = machine.then(readTools);
+    await machine;
     try {
       await libs();
       initViewer();
@@ -1818,7 +1828,7 @@
     } catch (e) {
       setStatus('Could not load AutoCAM: ' + e.message);
     }
-    await readTools();
+    await state.machineReady;
     state.poll = setInterval(function () { if (!ROOT.isConnected) { shutdown(); return; } pollConnection(); }, 5000);
     state.livePoll = setInterval(function () { if (ROOT.isConnected) pollLive(); }, 1000);
     renderAll();

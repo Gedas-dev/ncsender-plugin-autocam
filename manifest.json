@@ -1,0 +1,28 @@
+{
+  "id": "com.autocam.stepcam",
+  "name": "AutoCAM",
+  "version": "0.6.0",
+  "minAppVersion": "2.0.0",
+  "configUi": "config.html",
+  "author": "AutoCAM contributors",
+  "description": "STEP file to G-code inside ncSender (automatic CAM): open a part, pick the side that faces up, and AutoCAM finds the pockets, holes and outline, checks which tools are loaded in ncSender, and plans facing, roughing, rest machining, finishing and drilling, in one or two setups. Loads the program straight into ncSender.",
+  "category": "gcode-generator",
+  "repository": "",
+  "icon": "logo.png",
+  "platforms": {
+    "v2": "2.0.0",
+    "pro-v2": "2.0.0"
+  },
+  "events": [],
+  "permissions": [
+    "gcode.modify"
+  ],
+  "toolMenu": [
+    {
+      "id": "open-config",
+      "label": "AutoCAM",
+      "icon": "logo.png",
+      "clientOnly": true
+    }
+  ]
+}

@@ -32,9 +32,10 @@ Open or drop a `.step` / `.stp` file (mm).
 
 The plan is made in the background and updates on every change.
 - **Job time** shows the total, with each step's share as a coloured bar.
-- **Sequence**: Face the top → Rough out → Finish walls → Clean up corners → Finish corners → Spot drill → Drill.
-  - You can change the tool for facing, roughing and corners.
-  - Untick any step except roughing.
+- **Sequence**, named like in VCarve: Face the top → Engrave → Pocket → Cut around → Finish walls → Clean up corners → Finish corners → Spot drill → Drill.
+  - You can change the tool for facing, engraving, clearing (Pocket and Cut around) and corners.
+  - Untick any step except Pocket and Cut around.
+- **Around the part**: *Automatic* cuts around when the stock margin is wider than the slot, and clears otherwise. *Cut around* mills a slot one cutter wide along the outline, like a profile cut, and leaves the rest of the stock as scrap. *Clear all the stock* mills everything outside the part away. When the cut goes through (Leave at bottom ≤ 0), **holding tabs** keep the part in the stock; set their width and height under cutting values.
 - **Wall finish**: Quick (no finishing pass), Standard (0.2 mm left, then a finishing pass) or Fine (0.3 mm left, 0.2 mm steps on curves).
 - **Tool table and cutting values** (folded): flute length, flute count, RPM, feed, allowances and safe Z. Edits are saved.
 
@@ -50,6 +51,7 @@ The plan is made in the background and updates on every change.
   - a cut is deeper than the flute;
   - a tool has changed in ncSender;
   - the job doesn't fit the machine travel;
+  - with the current G54 zero, the stock or any move reaches into the **ATC zone** (ncSender's keep-out zones). This one can't be overridden, and AutoCAM checks again right before loading;
   - a G-code line grblHAL would reject.
 
   These are **warnings**: straight plunges, speeds or feeds over the limits, material left uncut, and planning notes.
@@ -62,6 +64,7 @@ The plan is made in the background and updates on every change.
 - whether ncSender is on G54;
 - where G54 zero is;
 - whether the job fits the soft limits with that zero;
+- whether the job and stock stay out of the ATC / keep-out zone;
 - where the spindle is, also as a red marker in 3D;
 - for setup 2, whether you zeroed again after turning the block over.
 
@@ -70,7 +73,9 @@ The plan is made in the background and updates on every change.
 | Step | What it does | Tool |
 | --- | --- | --- |
 | Face the top | Skims the stock top, stepping over 60% of the diameter | surfacing tool, else the largest end mill |
-| Rough out | Z-level offset clearing: ramps in, links passes at depth, stops on every floor | largest end mill that reaches the depth (or your choice) |
+| Engrave | V-carves grooves and lettering too narrow for the end mills: passes follow the groove outline, deeper towards the middle | sharpest V-bit (or your choice) |
+| Pocket | Z-level offset clearing of closed pockets inside the outline: ramps in, links passes at depth, stops on every floor | largest end mill that reaches the depth (or your choice) |
+| Cut around | The same clearing outside the part: a slot along the outline, or all the stock; tabs when it goes through | the Pocket tool |
 | Finish walls | Climb-milled wall contours. Only the stretches that change from one level to the next get their own pass; straight walls are finished once from the lowest level, over the full flute. | the roughing tool |
 | Clean up corners | Rest roughing where the big tool can't get in | largest smaller end mill that fits |
 | Finish corners | Finishes only what the big tool couldn't reach | the corner tool |
@@ -87,7 +92,7 @@ Holes with no matching drill are milled. An end mill needs 10% of its diameter f
 
 - 2.5D only: the part is machined from the top, and from the bottom with two setups. Sides are not machined.
 - Slopes and curves are finished as 0.2–0.5 mm steps with flat end mills; there is no ball-nose finishing yet.
-- No holding tabs.
+- Engraving is V-carving: square-bottomed grooves get V-shaped bottom corners.
 - Holder and collet collisions are not checked.
 - Feeds and speeds are starting values for a hobby machine.
 - Air-cut first.

@@ -141,6 +141,7 @@
   #ac-root .ac-play .ac-pbtn { width: 30px; height: 30px; padding: 0; border-radius: 50%; }
   #ac-root .ac-play select { width: auto; padding: 4px 6px; font-size: calc(12 * var(--ac-u)); }
   #ac-root .ac-play .ac-plabel { font-size: calc(11 * var(--ac-u)); color: var(--ac-text2); white-space: nowrap; min-width: 190px; text-align: right; font-variant-numeric: tabular-nums; }
+  #ac-root .ac-check { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: calc(12.5 * var(--ac-u)); cursor: pointer; }
   #ac-root .ac-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
   #ac-root .ac-checks li { background: var(--ac-bg); border-radius: 8px; padding: 6px 9px; font-size: calc(12 * var(--ac-u)); }
   #ac-root .ac-checks summary { cursor: pointer; display: flex; gap: 8px; align-items: baseline; list-style: none; }
@@ -316,15 +317,15 @@
   }
   // Operations by key: name when switched off, and the colour of its number in the sequence.
   var OPKEYS = {
-    face: ['Face the top', '#64748b'], rough: ['Rough out', '#22a06b'], rest: ['Clean up corners', '#0ea5b7'],
-    finish: ['Finish walls and corners', '#3b82f6'], spot: ['Spot drill', '#d4a017'], drill: ['Drill holes', '#a855f7']
+    face: ['Face the top', '#64748b'], engrave: ['Engrave', '#db2777'], pocket: ['Pocket', '#22a06b'], profile: ['Cut around', '#e8590c'],
+    rest: ['Clean up corners', '#0ea5b7'], finish: ['Finish walls and corners', '#3b82f6'], spot: ['Spot drill', '#d4a017'], drill: ['Drill holes', '#a855f7']
   };
   var SIDES = [['+Z', 'Top'], ['-Z', 'Bottom'], ['-Y', 'Front'], ['+Y', 'Back'], ['-X', 'Left'], ['+X', 'Right']];
 
   var cfg = Object.assign({
     up: '+Z', material: 'aluminum', origin: 'front-left', stockXY: 2, stockTop: 1, stockBottom: 1, leave: 0.2, skin: 1, safeZ: 5,
     rampAngle: 3, maxRpm: 24000, minRpm: 0, maxFeed: 2500, tools: {}, setups: '1', split: 0, frame: 6, web: 0.5, slopeStep: 0.5, yaw: 0, loaded: null,
-    zZero: 'top', opTools: {}, opsOff: {}
+    zZero: 'top', opTools: {}, opsOff: {}, outside: 'auto', tabs: true, tabHeight: 2, tabWidth: 6
   }, initialConfig || {});
   if (!AUTOCAM_ORIGINS[cfg.origin]) cfg.origin = 'front-left';
   var state = {
@@ -730,6 +731,10 @@
     try {
       var s = await (await fetch(BASE_URL + '/api/settings')).json();
       if (s && s.tool && s.tool.numbering) state.numbering = s.tool.numbering;
+      // Keep-out zones in machine coordinates (the ATC rack, set by the tool-changer plugin).
+      var zones = (s && s.keepout && s.keepout.zones) || [], k = s && s.advanced && s.advanced.keepoutZone;
+      if (!zones.length && k && k.min && k.max) zones = [{ name: 'Keep-out zone', enabled: k.enabled, minX: k.min.x, minY: k.min.y, maxX: k.max.x, maxY: k.max.y }];
+      state.keepout = zones.filter(function (z) { return z && z.enabled !== false && z.maxX > z.minX && z.maxY > z.minY; });
     } catch (e) { /* defaults */ }
     try {
       var fw = await (await fetch(BASE_URL + '/api/firmware')).json();
@@ -1052,6 +1057,12 @@
   }
 
   async function loadIntoSender() {
+    // The zero may have moved since the last poll: check the keep-out zones once more with the machine state right now.
+    if ((state.keepout || []).length) {
+      state.live = await readServerState();
+      var ko = keepoutHits(state.active);
+      if (ko && ko.hits.length) { setStatus('Not loaded: with the current G54 zero the job goes into the ' + ko.hits[0].zone + '.'); renderAll(); return; }
+    }
     setStatus('Sending to ncSender…');
     var res = await fetch(BASE_URL + '/api/gcode-files/load-temp', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1129,8 +1140,9 @@
     if (state.step === 3) {
       var v = verdict(state.active);
       next.textContent = two ? 'Load setup ' + (state.active + 1) + ' into ncSender' : 'Load into ncSender';
-      next.disabled = !state.gcodes.length || !v || (v.fails > 0 && !state.override[state.active]);
-      next.title = !v ? 'Checking the program first…' : v.fails && !state.override[state.active] ? 'Fix the failed checks, or tick “load anyway”' : '';
+      next.disabled = !state.gcodes.length || !v || v.keepout || (v.fails > 0 && !state.override[state.active]);
+      next.title = !v ? 'Checking the program first…' : v.keepout ? 'The job goes into the ATC / keep-out zone with this zero' :
+        v.fails && !state.override[state.active] ? 'Fix the failed checks, or tick “load anyway”' : '';
     }
   }
 
@@ -1295,24 +1307,26 @@
       }).join('') + '</div><div class="ac-hint" style="margin:0">Cutting ' + fmtTime(cutting) + ' · tool changes and moves between them ' + fmtTime(Math.max(0, total - cutting)) + '</div></div>';
     var n = 0;
     var list = '<div class="ac-card"><h4>Sequence</h4><ol class="ac-seq">' + items.map(function (it) {
-      var key = it.key, off = !!it.off;
+      var key = it.key, off = !!it.off, always = key === 'pocket' || key === 'profile';
       var choose = key === 'face' ? tools.filter(function (t) { return t.kind === 'face' || t.kind === 'flat'; })
-        : key === 'rough' || key === 'rest' ? tools.filter(function (t) { return t.kind === 'flat'; }) : null;
+        : always || key === 'rest' ? tools.filter(function (t) { return t.kind === 'flat'; })
+        : key === 'engrave' ? tools.filter(function (t) { return t.kind === 'spot'; }) : null;
+      var tkey = always ? 'rough' : key; // Pocket and Cut around share the clearing tool
       var toolHtml;
       if (choose && !off) {
         var cur = it.ops[0].tool;
-        toolHtml = '<select data-optool="' + key + '" title="Tool for this step"><option value="">Auto · T' + cur.number + ' ' + esc(shortTool(cur.label)) + '</option>' +
+        toolHtml = '<select data-optool="' + tkey + '" title="Tool for this step' + (always ? ' (Pocket and Cut around use the same tool)' : '') + '"><option value="">Auto · T' + cur.number + ' ' + esc(shortTool(cur.label)) + '</option>' +
           choose.map(function (t) {
-            return '<option value="' + t.number + '"' + (Number(cfg.opTools[key]) === t.number ? ' selected' : '') + '>T' + t.number + ' ' + esc(t.name || t.kind) + ' Ø' + t.diameter + '</option>';
+            return '<option value="' + t.number + '"' + (Number(cfg.opTools[tkey]) === t.number ? ' selected' : '') + '>T' + t.number + ' ' + esc(t.name || t.kind) + ' Ø' + t.diameter + '</option>';
           }).join('') + '</select>';
-        if (cfg.opTools[key]) toolHtml = toolHtml.replace('<option value="">Auto · T' + cur.number, '<option value="">Auto');
+        if (cfg.opTools[tkey]) toolHtml = toolHtml.replace('<option value="">Auto · T' + cur.number, '<option value="">Auto');
       } else if (!off) {
         var labels = it.ops.map(function (o) { return 'T' + o.tool.number + ' ' + shortTool(o.tool.label); }).filter(function (x, i, a) { return a.indexOf(x) === i; });
         toolHtml = '<span title="' + esc(labels.join(', ')) + '">' + esc(labels.join(', ')) + '</span>';
       }
       var meta = off ? (key === 'drill' ? 'Off: holes are milled instead' : key === 'finish' ? 'Off: roughing cuts the walls to size' : 'Off')
         : it.ops[0].cutting.rpm.toLocaleString() + ' rpm · F' + it.ops[0].cutting.feed + (two ? ' · setup ' + it.setups.join('+') : '');
-      return '<li class="' + (off ? 'ac-off' : '') + '"><input type="checkbox" data-opoff="' + key + '"' + (off ? '' : ' checked') + (key === 'rough' ? ' disabled title="Roughing always runs"' : ' title="Include this step"') + '>' +
+      return '<li class="' + (off ? 'ac-off' : '') + '"><input type="checkbox" data-opoff="' + key + '"' + (off ? '' : ' checked') + (always ? ' disabled title="Clearing always runs"' : ' title="Include this step"') + '>' +
         '<em style="background:' + it.color + '">' + (off ? '–' : ++n) + '</em><b title="' + esc(it.name) + '">' + esc(it.name) + '</b><time>' + (off ? '' : fmtTime(it.secs)) + '</time>' +
         '<div class="ac-seqmore">' + (toolHtml || '') + '<span>' + esc(meta) + '</span></div>' +
         (off ? '' : '<div class="ac-share"><i style="width:' + (it.secs / (cutting || 1) * 100) + '%;background:' + it.color + '"></i></div>') + '</li>';
@@ -1324,11 +1338,25 @@
   function shortTool(label) { return String(label).replace(/^T\d+\s*/, '').replace(/\s+D[\d.]+$/, ''); }
 
   function finishCard() {
-    var cur = finishPreset(), p = state.plans[0] || (state.prevPlans || [])[0], rough = p && p.ops.filter(function (o) { return o.key === 'rough'; })[0];
+    var cur = finishPreset(), p = state.plans[0] || (state.prevPlans || [])[0], rough = p && p.ops.filter(function (o) { return o.key === 'pocket' || o.key === 'profile'; })[0];
     return '<div class="ac-card"><h4>Wall finish</h4><div class="ac-opts">' + Object.keys(FINISH).map(function (k) {
       return option('finish', k, cur, FINISH[k].label, FINISH[k].text);
     }).join('') + '</div>' + (cur ? '' : '<div class="ac-hint">Custom: ' + cfg.leave + ' mm allowance, ' + cfg.slopeStep + ' mm slope step' + (cfg.opsOff.finish ? ', no finishing pass' : '') + ' (set under Tool table and cutting values).</div>') +
       (rough ? '<div class="ac-cutdata">Roughing: T' + rough.tool.number + ' · ' + rough.cutting.rpm.toLocaleString() + ' rpm · ' + rough.cutting.feed + ' mm/min · ' + fmt(rough.tool.maxDoc || 0) + ' mm deep per pass</div>' : '') + '</div>';
+  }
+
+  /** Around the part: a slot round the outline (a profile cut, VCarve style) or clearing all the stock; tabs. */
+  function outsideCard() {
+    var plans = state.plans.length ? state.plans : state.prevPlans || [];
+    if (cfg.setups !== '1' || plans.length > 1) return ''; // two setups always cut a moat and keep the frame
+    var p = plans[0], n = p && p.tabs ? p.tabs.length : 0, through = cfg.skin <= 0;
+    var cutting = p ? p.cutAround : cfg.outside === 'cut';
+    return '<div class="ac-card"><h4>Around the part</h4><div class="ac-opts">' +
+      option('outside', 'auto', cfg.outside, 'Automatic' + (p ? ': ' + (cutting ? 'cut around' : 'clear') : ''), 'Cut around when the stock margin is wider than the slot; with a narrow margin clearing it is just as quick.') +
+      option('outside', 'cut', cfg.outside, 'Cut around', 'A slot one cutter wide follows the outline, like a profile cut. The rest of the stock stays as scrap. Fastest with a big margin.') +
+      option('outside', 'clear', cfg.outside, 'Clear all the stock', 'Mills away everything outside the part, down to the bottom.') + '</div>' +
+      (cutting ? '<label class="ac-check"><input type="checkbox" name="tabs"' + (cfg.tabs ? ' checked' : '') + '><span>Holding tabs' +
+        (!through ? ' (only when cutting through: set Leave at bottom to 0 or less)' : n ? ': ' + n + ' tabs, ' + cfg.tabWidth + ' × ' + cfg.tabHeight + ' mm' : '') + '</span></label>' : '') + '</div>';
   }
 
   function panelOps() {
@@ -1351,7 +1379,7 @@
         '<td>' + (t.toolId === state.spindleTool ? '<span class="ac-badge ac-used">in spindle</span>' : '') + (!kind ? '<span class="ac-badge">not used</span>' : '') + '</td></tr>';
     });
     var usable = state.ncTools.filter(function (t) { return A.kindOf(t); }).length;
-    return planRows() + finishCard() + '<div class="ac-card"><h4>Tools for this job <button class="ac-btn ac-small" id="ac-refresh">Refresh</button></h4>' + usedTools() + '</div>' +
+    return planRows() + outsideCard() + finishCard() + '<div class="ac-card"><h4>Tools for this job <button class="ac-btn ac-small" id="ac-refresh">Refresh</button></h4>' + usedTools() + '</div>' +
       '<details class="ac-card"' + (state.moreOpen ? ' open' : '') + ' id="ac-more"><summary><h4>Tool table and cutting values</h4></summary>' +
       (state.ncTools.length ? '<div class="ac-scrollx"><table class="ac-tools"><colgroup><col style="width:28px"><col style="width:40px"><col><col style="width:70px"><col style="width:50px">' +
         '<col style="width:70px"><col style="width:62px"><col style="width:80px"><col style="width:80px"><col style="width:84px"></colgroup>' +
@@ -1363,7 +1391,7 @@
       '<h4 style="margin-top:14px">Cutting</h4><div class="ac-fields" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">' +
       field('leave', 'Finish allowance (mm)', 0.05) + field('skin', 'Leave at bottom (mm)', 0.1, 'Material left under the part. 0 cuts to the bottom; negative cuts into the spoilboard to go through.', -3) + field('safeZ', 'Safe Z above stock (mm)', 1) +
       field('rampAngle', 'Ramp angle (°)', 0.5) + field('maxRpm', 'Spindle max RPM', 100) + field('minRpm', 'Spindle min RPM', 100) +
-      field('maxFeed', 'Max feed (mm/min)', 50) +
+      field('maxFeed', 'Max feed (mm/min)', 50) + field('tabWidth', 'Tab width (mm)', 1) + field('tabHeight', 'Tab height (mm)', 0.5) +
       field('slopeStep', 'Slope finishing step (mm)', 0.1, 'Contour spacing on sloped or curved walls. Smaller is smoother but longer; 0 turns it off.') + '</div></details>';
   }
 
@@ -1501,6 +1529,57 @@
     return neg && force ? [0, T] : [-T, 0];
   }
 
+  /** G54 zero in machine coordinates (with any tool length offset or G92), or null when the machine is not connected. */
+  function liveZero(ms) {
+    if (!ms || !ms.connected || !ms.g54) return null;
+    var ws = String(ms.workspace || 'G54').toLowerCase();
+    var g54 = vec(ms.g54), act = vec(ms[ws] || ms.g54), wco = vec(ms.WCO);
+    return [0, 1, 2].map(function (a) { return g54[a] + (ms.WCO ? wco[a] - act[a] : 0); });
+  }
+
+  /** Does a segment come within r of a rectangle? (Liang–Barsky on the rectangle grown by r.) */
+  function segHitsBox(x0, y0, x1, y1, b, r) {
+    var lo = 0, hi = 1, dx = x1 - x0, dy = y1 - y0;
+    var P = [-dx, dx, -dy, dy], Q = [x0 - (b[0] - r), b[2] + r - x0, y0 - (b[1] - r), b[3] + r - y0];
+    for (var k = 0; k < 4; k++) {
+      if (P[k] === 0) { if (Q[k] < 0) return false; continue; }
+      var t = Q[k] / P[k];
+      if (P[k] < 0) { if (t > hi) return false; if (t > lo) lo = t; } else { if (t < lo) return false; if (t < hi) hi = t; }
+    }
+    return true;
+  }
+
+  /** Where setup i, run from the live G54 zero, enters a keep-out zone (the ATC rack): null when it can't be told. */
+  function keepoutHits(i) {
+    var zones = state.keepout || [], p = state.plans[i];
+    if (!zones.length || !p) return { zones: 0, hits: [] };
+    var zero = liveZero(state.live);
+    if (!zero) return null;
+    var o = p.origin, dx = zero[0] - o.x, dy = zero[1] - o.y, hits = [];
+    zones.forEach(function (z) {
+      var b = [z.minX, z.minY, z.maxX, z.maxY], name = z.name || 'Keep-out zone';
+      var st = p.stock;
+      if (segHitsBox(st.x0 + dx, st.y0 + dy, st.x1 + dx, st.y0 + dy, b, 0) || segHitsBox(st.x0 + dx, st.y1 + dy, st.x1 + dx, st.y1 + dy, b, 0) ||
+          segHitsBox(st.x0 + dx, st.y0 + dy, st.x0 + dx, st.y1 + dy, b, 0) || segHitsBox(st.x1 + dx, st.y0 + dy, st.x1 + dx, st.y1 + dy, b, 0) ||
+          (b[0] > st.x0 + dx && b[2] < st.x1 + dx && b[1] > st.y0 + dy && b[3] < st.y1 + dy)) {
+        hits.push({ zone: name, what: 'The stock block', at: null });
+      }
+      p.ops.forEach(function (op) {
+        // A V-bit's cone is up to its 1/4" shank wide; anything else by its diameter.
+        var r = op.tool.kind === 'spot' ? Math.max(op.tool.diameter / 2, 3.2) : op.tool.diameter / 2, m = op.moves, n = 0, first = null;
+        for (var k = 4; k < m.length; k += 4) {
+          if (segHitsBox(m[k - 4] + dx, m[k - 3] + dy, m[k] + dx, m[k + 1] + dy, b, r)) { n++; if (!first) first = [m[k] - o.x, m[k + 1] - o.y]; }
+        }
+        if (n) hits.push({ zone: name, what: op.name + ' (T' + op.tool.number + ')', n: n, at: first });
+      });
+    });
+    return { zones: zones.length, hits: hits };
+  }
+
+  function keepoutText(h) {
+    return h.what + (h.n ? ': ' + h.n + ' move' + (h.n > 1 ? 's' : '') + ', first at X' + fmt(h.at[0]) + ' Y' + fmt(h.at[1]) : ' overlaps it');
+  }
+
   /** What the live machine state means for setup i: [[level, text], ...]. */
   function liveRows(i) {
     var ms = state.live, p = state.plans[i], u = state.uiChecks[i], rows = [];
@@ -1525,6 +1604,12 @@
       });
       if (over.length) over.forEach(function (t) { rows.push(['fail', 'With this zero the job hits a limit: ' + t + (t[0] === 'Z' ? ' (with the tool in the spindle now)' : '')]); });
       else rows.push(['ok', 'With this zero the whole job stays inside the machine travel' + (state.fw.softLimits === 1 ? ' and soft limits' : '')]);
+    }
+    var ko = keepoutHits(i);
+    if (ko && ko.zones) {
+      if (ko.hits.length) rows.push(['fail', 'With this zero the job goes into the ' + ko.hits[0].zone + ': ' +
+        ko.hits.map(function (h) { return h.n ? h.what.replace(/ \(T\d+\)$/, '') : 'the stock block'; }).join(', ') + '. Loading is blocked.']);
+      else rows.push(['ok', 'With this zero the job and stock stay out of the ' + state.keepout.map(function (z) { return z.name || 'keep-out zone'; }).join(', ')]);
     }
     // Where the spindle is, relative to the stock
     var st = p.stock, o = p.origin, x = o.x + w[0], y = o.y + w[1];
@@ -1583,6 +1668,8 @@
     state.livePolling = true;
     state.live = await readServerState();
     state.livePolling = false;
+    var ko = keepoutHits(state.active), sig = ko ? JSON.stringify(ko.hits.map(keepoutText)) : 'none';
+    if (sig !== state.koSig) { state.koSig = sig; renderPanel(); renderFooter(); }
     var el = $('ac-live');
     if (el) {
       el.innerHTML = liveBody();
@@ -1678,6 +1765,12 @@
     row(u.tools.length ? 'fail' : 'pass', u.tools.length ? 'Tools changed in ncSender' : 'Tools match ncSender’s tool table', u.tools);
     row(u.limits.length ? 'warn' : 'pass', u.limits.length ? 'Speeds or feeds outside the machine limits' : 'Speeds and feeds within the machine limits', u.limits);
     row(u.travel.length ? 'fail' : 'pass', u.travel.length ? 'Does not fit the machine travel' : 'Fits the machine travel (' + u.span + ')', u.travel);
+    if ((state.keepout || []).length) {
+      var ko = keepoutHits(i), zn = state.keepout.map(function (z) { return z.name || 'keep-out zone'; }).join(', ');
+      if (!ko) row('warn', 'Not checked against the ' + zn + ': connect the machine so AutoCAM can read the G54 zero', []);
+      else row(ko.hits.length ? 'fail' : 'pass', ko.hits.length ? 'Goes into the ' + zn + ' with the current G54 zero: move the zero or the stock'
+        : 'Stays out of the ' + zn + ' with the current G54 zero', ko.hits.map(function (h) { return h.zone + ': ' + keepoutText(h); }));
+    }
     row(c.gcode.length ? 'fail' : 'pass', c.gcode.length ? c.gcode.length + ' G-code line' + (c.gcode.length > 1 ? 's' : '') + ' grblHAL would reject' : 'G-code valid for grblHAL',
       c.gcode.map(function (b) { return 'line ' + b.line + ': ' + b.text + ' (' + b.why + ')'; }));
     var notes = p.warnings.filter(function (w) { return !/frame outside/.test(w); });
@@ -1688,7 +1781,9 @@
   function verdict(i) {
     var rows = checkRows(i);
     if (!rows) return null;
-    return { rows: rows, fails: rows.filter(function (r) { return r.level === 'fail'; }).length, warns: rows.filter(function (r) { return r.level === 'warn'; }).length };
+    var ko = keepoutHits(i);
+    return { rows: rows, fails: rows.filter(function (r) { return r.level === 'fail'; }).length, warns: rows.filter(function (r) { return r.level === 'warn'; }).length,
+      keepout: !!(ko && ko.hits.length) };
   }
 
   function checksCard() {
@@ -1704,7 +1799,8 @@
       return '<li class="' + cls[r.level] + '">' + (r.items.length ? '<details' + (r.level === 'fail' ? ' open' : '') + '><summary>' + body + '</summary><ul>' +
         r.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></details>' : '<div style="display:flex;gap:8px">' + body + '</div>') + '</li>';
     }).join('') + '</ul>';
-    if (v.fails) html += '<label class="ac-override"><input type="checkbox" data-override="' + i + '"' + (state.override[i] ? ' checked' : '') +
+    if (v.keepout) html += '<div class="ac-hint" style="color:#e5484d">Loading stays blocked while the job reaches into the ATC / keep-out zone: set G54 elsewhere, or move the stock.</div>';
+    else if (v.fails) html += '<label class="ac-override"><input type="checkbox" data-override="' + i + '"' + (state.override[i] ? ' checked' : '') +
       '><span>I’ve checked these problems and want to load this program anyway.</span></label>';
     return html + '</div>';
   }
@@ -1790,6 +1886,10 @@
       cfg.opsOff[el.dataset.opoff] = !el.checked;
     } else if (el.name === 'origin' || el.name === 'setups') {
       cfg[el.name] = el.value;
+    } else if (el.name === 'outside') {
+      cfg.outside = el.value;
+    } else if (el.name === 'tabs') {
+      cfg.tabs = el.checked;
     } else if (el.name === 'zzero') {
       cfg.zZero = el.value;
     } else if (el.name === 'finish') {

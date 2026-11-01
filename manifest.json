@@ -1,7 +1,7 @@
 {
   "id": "com.autocam.stepcam",
   "name": "AutoCAM",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "minAppVersion": "2.0.0",
   "configUi": "config.html",
   "author": "AutoCAM contributors",

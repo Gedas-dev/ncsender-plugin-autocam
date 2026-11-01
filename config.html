@@ -290,7 +290,10 @@
   var ROOT = document.getElementById('ac-root');
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function fileUrl(f) { return BASE_URL + '/api/plugins/' + PLUGIN_ID + '/icon?file=' + encodeURIComponent(f); }
+  // Plugin files are served without Cache-Control: the version in the URL makes the browser fetch new files after an update.
+  var VERSION = '';
+  function fileUrl(f) { return BASE_URL + '/api/plugins/' + PLUGIN_ID + '/icon?file=' + encodeURIComponent(f) + (VERSION ? '&v=' + encodeURIComponent(VERSION) : ''); }
+  function getJson(path) { return fetch(BASE_URL + path, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(path + ': HTTP ' + r.status); return r.json(); }); }
   function fmt(v) { return (Math.round(v * 10) / 10).toString(); }
   function fmtTime(s) { var m = Math.floor(s / 60); return m >= 60 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : m + ' min ' + Math.round(s % 60) + ' s'; }
 
@@ -369,14 +372,24 @@
     window[privateName] = window[globalName];
     window[globalName] = had ? prev : undefined; // a global made with `var` can't be deleted, only cleared
   }
+  function readVersion() {
+    return fetch(fileUrl('manifest.json'), { cache: 'no-store' }).then(function (r) { return r.json(); })
+      .then(function (m) { VERSION = String(m.version || ''); return VERSION; }).catch(function () { return ''; });
+  }
   function libs() {
+    // The libraries stay on window between openings of the dialog; an updated plugin loads its own engine again.
+    if (window.__autocamStepLibs && window.__autocamStepLibsVersion !== VERSION) window.__autocamStepLibs = null;
     if (!window.__autocamStepLibs) {
+      var fresh = window.__autocamStepLibsVersion !== undefined && window.__autocamStepLibsVersion !== VERSION;
+      window.__autocamStepLibsVersion = VERSION;
       window.__autocamStepLibs = (async function () {
         // Private copies: another plugin may have put a different three.js or occt-import-js on window.
         await loadPrivate('lib/three.min.js', 'THREE', '__autocamTHREE');
-        if (!window.AutoCAM) await loadScript('lib/autocam-engine.js');
+        if (!window.AutoCAM || fresh) await loadScript('lib/autocam-engine.js');
         await loadPrivate('lib/occt-import-js.js', 'occtimportjs', '__autocamOcctFactory');
-        var wasm = await (await fetch(fileUrl('lib/occt-import-js.wasm'))).arrayBuffer();
+        var wr = await fetch(fileUrl('lib/occt-import-js.wasm'));
+        if (!wr.ok) throw new Error('Plugin file missing: lib/occt-import-js.wasm');
+        var wasm = await wr.arrayBuffer();
         var occt = await window.__autocamOcctFactory({ wasmBinary: wasm });
         var workerSrc = await Promise.all(['lib/clipper.js', 'lib/autocam-engine.js', 'lib/autocam-sim.js', 'lib/autocam-worker.js'].map(fetchText));
         return { occt: occt, workerUrl: URL.createObjectURL(new Blob(workerSrc, { type: 'text/javascript' })) };
@@ -762,7 +775,7 @@
   // ------------------------------------------------------------------ ncSender data
   async function readMachine() {
     try {
-      var s = await (await fetch(BASE_URL + '/api/settings')).json();
+      var s = await getJson('/api/settings');
       if (s && s.tool && s.tool.numbering) state.numbering = s.tool.numbering;
       // Keep-out zones in machine coordinates (the ATC rack, set by the tool-changer plugin).
       var zones = (s && s.keepout && s.keepout.zones) || [], k = s && s.advanced && s.advanced.keepoutZone;
@@ -770,29 +783,54 @@
       state.keepout = zones.filter(function (z) { return z && z.enabled !== false && z.maxX > z.minX && z.maxY > z.minY; });
     } catch (e) { /* defaults */ }
     try {
-      var fw = await (await fetch(BASE_URL + '/api/firmware')).json();
+      var fw = await getJson('/api/firmware');
       var st = fw && fw.settings, v = function (k) { return st && st[k] ? parseFloat(st[k].value) : NaN; };
       state.fw = { maxRpm: v('30'), minRpm: v('31'), rateX: v('110'), rateY: v('111'), rateZ: v('112'), travelX: v('130'), travelY: v('131'), travelZ: v('132'),
                    softLimits: v('20'), homeFlags: v('22'), homeDir: v('23') };
-      if (initialConfig && initialConfig.maxRpm) return; // the user's own values win
-      if (v('30') > 0) cfg.maxRpm = v('30');
-      if (v('31') >= 0) cfg.minRpm = v('31');
-      var rates = [v('110'), v('111')].filter(function (x) { return x > 0; });
-      if (rates.length) cfg.maxFeed = Math.round(Math.min.apply(null, rates));
+      fitToFirmware();
     } catch (e) { /* firmware not read yet */ }
+  }
+
+  /** Keep the user's spindle and feed values, but never past what grblHAL allows ($30, $31, $110, $111). */
+  function fitToFirmware() {
+    var fw = state.fw || {}, before = [cfg.maxRpm, cfg.minRpm, cfg.maxFeed].join();
+    if (fw.maxRpm > 0) cfg.maxRpm = Math.min(cfg.maxRpm, fw.maxRpm);
+    if (fw.minRpm > 0) cfg.minRpm = Math.max(cfg.minRpm, Math.min(fw.minRpm, cfg.maxRpm));
+    var xy = Math.min(fw.rateX > 0 ? fw.rateX : Infinity, fw.rateY > 0 ? fw.rateY : Infinity);
+    if (xy < Infinity) cfg.maxFeed = Math.min(cfg.maxFeed, Math.round(xy));
+    return before !== [cfg.maxRpm, cfg.minRpm, cfg.maxFeed].join();
+  }
+
+  function toolKey(list) {
+    return JSON.stringify(list.map(function (t) { return [t.toolId, t.type, t.diameter, t.name, t.dimensions]; }));
   }
 
   async function readTools() {
     try {
-      var tools = await (await fetch(BASE_URL + '/api/tools/active')).json();
+      var tools = await getJson('/api/tools/active');
       state.ncTools = (tools || []).filter(function (t) { return t && t.diameter > 0 && t.toolId > 0; });
+      state.toolKey = toolKey(state.ncTools);
     } catch (e) { state.ncTools = []; }
     await pollConnection();
   }
 
+  /** A tool added, removed or measured in ncSender while AutoCAM is open: plan again with the new table. */
+  async function watchTools() {
+    var tools;
+    try { tools = (await getJson('/api/tools/active') || []).filter(function (t) { return t && t.diameter > 0 && t.toolId > 0; }); } catch (e) { return; }
+    var key = toolKey(tools);
+    if (key === state.toolKey) return;
+    state.ncTools = tools;
+    state.toolKey = key;
+    invalidate();
+    if (state.step === 2) planSoon();
+    renderAll();
+    setStatus('Tool table changed in ncSender; the plan uses the new tools.');
+  }
+
   async function pollConnection() {
     try {
-      var ss = await (await fetch(BASE_URL + '/api/server-state')).json();
+      var ss = await getJson('/api/server-state');
       state.connected = !!(ss && ss.machineState && ss.machineState.connected);
       state.spindleTool = Number(ss && ss.machineState && ss.machineState.tool) || 0;
     } catch (e) { state.connected = false; }
@@ -801,7 +839,9 @@
   }
 
   function machineCfg() {
-    return { maxRpm: cfg.maxRpm, minRpm: cfg.minRpm, maxFeed: cfg.maxFeed, rapidRate: Math.max(cfg.maxFeed, 3000), toolChangeS: 60 };
+    var fw = state.fw || {}, xy = Math.min(fw.rateX > 0 ? fw.rateX : Infinity, fw.rateY > 0 ? fw.rateY : Infinity);
+    return { maxRpm: cfg.maxRpm, minRpm: cfg.minRpm, maxFeed: cfg.maxFeed, maxZFeed: fw.rateZ > 0 ? fw.rateZ : 0,
+             rapidRate: xy < Infinity ? xy : Math.max(cfg.maxFeed, 3000), toolChangeS: 60 };
   }
 
   function camTools() { return window.AutoCAM ? AutoCAM.buildTools(state.ncTools, cfg.tools, cfg.material) : []; }
@@ -1077,6 +1117,7 @@
 
   /** After a setting changes: save it, drop the old plan, and show the change. */
   function changed() {
+    fitToFirmware();
     saveSettings();
     invalidate();
     if (state.step === 1 || state.step === 2) refreshScene(false);
@@ -1816,7 +1857,7 @@
   async function machineChecks(i) {
     var p = state.plans[i], out = { tools: [], limits: [], travel: [], span: '' };
     var now = [];
-    try { now = await (await fetch(BASE_URL + '/api/tools/active')).json(); } catch (e) { out.tools.push('Could not read the tool table from ncSender.'); }
+    try { now = await getJson('/api/tools/active'); } catch (e) { out.tools.push('Could not read the tool table from ncSender.'); }
     var seen = {}, fw = state.fw || {};
     p.ops.forEach(function (op) {
       var t = op.tool, c = op.cutting;
@@ -2043,8 +2084,9 @@
   $('ac-segs').addEventListener('click', function (e) { e.stopPropagation(); });
 
   (async function init() {
+    await readVersion();
+    if (VERSION) $('ac-ver').textContent = 'STEP → G-code · v' + VERSION;
     $('ac-logo').src = fileUrl('logo.png');
-    fetchText('manifest.json').then(function (t) { $('ac-ver').textContent = 'STEP → G-code · v' + JSON.parse(t).version; }).catch(function () {});
     renderAll();
     var machine = readMachine();
     state.machineReady = machine.then(readTools);
@@ -2057,7 +2099,7 @@
       setStatus('Could not load AutoCAM: ' + e.message);
     }
     await state.machineReady;
-    state.poll = setInterval(function () { if (!ROOT.isConnected) { shutdown(); return; } pollConnection(); }, 5000);
+    state.poll = setInterval(function () { if (!ROOT.isConnected) { shutdown(); return; } pollConnection(); watchTools(); }, 5000);
     state.livePoll = setInterval(function () { if (ROOT.isConnected) pollLive(); }, 1000);
     renderAll();
   })();

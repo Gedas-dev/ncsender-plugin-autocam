@@ -41,7 +41,7 @@ AutoCAM reads your 3D part, finds the pockets, holes, lettering and outline, pla
 
 ![Stock & zero](docs/2-stock-zero.jpg)
 
-- **Material** sets cutting speed, feed per tooth, depth per pass and stepover.
+- **Material** sets cutting speed, feed per tooth, depth per pass and stepover. The stock is drawn in the material's colour.
 - **Stock block** is the part plus a margin on each side and on top.
 - **Work zero (G54)** can be any of 9 points: a corner, the middle of an edge, or the centre. Z goes on the stock top or on the spoilboard.
 - **Setups**: one, or two with the block turned over.
@@ -53,6 +53,9 @@ AutoCAM reads your 3D part, finds the pockets, holes, lettering and outline, pla
 - The plan updates in the background whenever you change something.
 - **Job time** shows the total, with each step's share as a coloured bar.
 - **Sequence**: change the tool for a step, or untick it. Pocket and Cut around always run.
+- **Cut out**:
+  - *Cut right through*: goes 0.2 mm into the spoilboard, so you get just the finished part.
+  - *Leave a thin skin*: stops 1 mm above the bottom, so the part stays in the stock.
 - **Around the part**:
   - *Automatic*: cuts around when the stock margin is wider than the slot, and clears otherwise.
   - *Cut around*: a slot one cutter wide along the outline, like a profile cut. The rest of the stock stays as scrap.
@@ -115,6 +118,8 @@ These screenshots are from the test part [`examples/sign.step`](examples/sign.st
 </table>
 
 **8 · Spot drill and Drill**: when a drill in the tool table matches a hole (within 0.02 mm) and is long enough, the hole is spotted with the V-bit and peck-drilled. Through holes go 1 mm past the bottom. Without a matching drill, the hole is milled instead.
+
+**Countersink and mark holes**: a hole smaller than every drill and end mill (for example Ø3.4 with only 4 mm end mills) can't be cut. Instead, a V-bit cuts its countersink and marks the centre, before the part is cut free; you then drill the hole by hand. AutoCAM picks a V-bit no narrower than the countersink, so it never cuts into the wall: a 90° V-bit cuts a 90° countersink exactly.
 
 ---
 

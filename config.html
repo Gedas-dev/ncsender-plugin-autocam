@@ -299,6 +299,12 @@
     'front-left': [0, 0], 'front': [0.5, 0], 'front-right': [1, 0], 'left': [0, 0.5], 'center': [0.5, 0.5], 'right': [1, 0.5],
     'back-left': [0, 1], 'back': [0.5, 1], 'back-right': [1, 1]
   };
+  /** The chosen material's colour as [r, g, b] in 0..1 (stock in the simulation) or as a number (stock outline). */
+  function matRGB() {
+    var h = (MAT_LOOK[cfg.material] || ['#9ca3af'])[0];
+    return [1, 3, 5].map(function (i) { return parseInt(h.substr(i, 2), 16) / 255; });
+  }
+  function matHex() { return parseInt((MAT_LOOK[cfg.material] || ['#9ca3af'])[0].slice(1), 16); }
   function zeroText() { return AutoCAM.originText(cfg.origin, cfg.zZero); }
   // How each material card looks: swatch colour and a short example line.
   var MAT_LOOK = {
@@ -634,16 +640,16 @@
     if (state.step === 1 && bb) {
       var st = stockBox();
       addFront(st);
-      addBox(st.x0, st.y0, st.z0, st.x1, st.y1, st.z1, 0x64748b, 0.9);
+      addBox(st.x0, st.y0, st.z0, st.x1, st.y1, st.z1, matHex(), 0.9);
       addZeroPoints(st);
     } else if (state.step === 2 && bb && state.plans[0]) {
       var ps = state.plans[0].stock;
-      addBox(ps.x0, ps.y0, ps.z0, ps.x1, ps.y1, ps.z1, 0x64748b, 0.6);
+      addBox(ps.x0, ps.y0, ps.z0, ps.x1, ps.y1, ps.z1, matHex(), 0.7);
       addFront(ps);
       addToolpaths(state.plans[0], 0.55);
     } else if (state.step === 3 && state.plans[state.active]) {
       var p = state.plans[state.active], s = p.stock;
-      addBox(s.x0, s.y0, s.z0, s.x1, s.y1, s.z1, 0x64748b, 0.6);
+      addBox(s.x0, s.y0, s.z0, s.x1, s.y1, s.z1, matHex(), 0.7);
       addZero(p.origin.x, p.origin.y, p.origin.z, Math.max(8, (s.x1 - s.x0) * 0.1));
       addFront(s);
       var sim = state.sims[state.active];
@@ -1351,12 +1357,17 @@
     if (cfg.setups !== '1' || plans.length > 1) return ''; // two setups always cut a moat and keep the frame
     var p = plans[0], n = p && p.tabs ? p.tabs.length : 0, through = cfg.skin <= 0;
     var cutting = p ? p.cutAround : cfg.outside === 'cut';
-    return '<div class="ac-card"><h4>Around the part</h4><div class="ac-opts">' +
+    var slot = Math.ceil(Math.max.apply(null, camTools().filter(function (t) { return t.kind === 'flat'; }).map(function (t) { return t.diameter; }).concat([0])) + 1);
+    return '<div class="ac-card"><h4>Cut out</h4><div class="ac-opts">' +
+      option('bottom', 'through', through ? 'through' : 'skin', 'Cut right through', 'Goes ' + fmt(Math.max(0.2, -cfg.skin)) + ' mm into the spoilboard so the part comes out of the stock. Put a spoilboard under it.') +
+      option('bottom', 'skin', through ? 'through' : 'skin', 'Leave a thin skin', 'Stops ' + fmt(through ? 1 : cfg.skin) + ' mm above the bottom, so the part stays in the stock; break it out and sand it.') +
+      '</div><h4 style="margin-top:12px">Around the part</h4><div class="ac-opts">' +
       option('outside', 'auto', cfg.outside, 'Automatic' + (p ? ': ' + (cutting ? 'cut around' : 'clear') : ''), 'Cut around when the stock margin is wider than the slot; with a narrow margin clearing it is just as quick.') +
       option('outside', 'cut', cfg.outside, 'Cut around', 'A slot one cutter wide follows the outline, like a profile cut. The rest of the stock stays as scrap. Fastest with a big margin.') +
       option('outside', 'clear', cfg.outside, 'Clear all the stock', 'Mills away everything outside the part, down to the bottom.') + '</div>' +
       (cutting ? '<label class="ac-check"><input type="checkbox" name="tabs"' + (cfg.tabs ? ' checked' : '') + '><span>Holding tabs' +
-        (!through ? ' (only when cutting through: set Leave at bottom to 0 or less)' : n ? ': ' + n + ' tabs, ' + cfg.tabWidth + ' × ' + cfg.tabHeight + ' mm' : '') + '</span></label>' : '') + '</div>';
+        (!through ? ' (only when cutting right through)' : n ? ': ' + n + ' tabs, ' + cfg.tabWidth + ' × ' + cfg.tabHeight + ' mm' : '') + '</span></label>' : '') +
+      (through && !cutting ? '<div class="ac-hint">Nothing holds the part once it is cut free: screw, clamp or tape it down. Tabs need a stock margin wider than ' + slot + ' mm (Stock & zero step) and Cut around.</div>' : '') + '</div>';
   }
 
   function panelOps() {
@@ -1438,14 +1449,14 @@
     f = Math.max(0, Math.min(sim.frames.length - 1, f));
     state.frame = f;
     var g = sim.grid, q = sim.frames[f], span = g.zHigh - g.zLow, pos = sim.geom.attributes.position.array, col = sim.geom.attributes.color.array;
-    var last = f === sim.frames.length - 1, zb = p.stock.z0, zt = p.stock.z1;
+    var last = f === sim.frames.length - 1, zb = p.stock.z0, zt = p.stock.z1, mc = matRGB();
     for (var c = 0; c < q.length; c++) {
       var z = g.zLow + q[c] / 65535 * span;
       pos[3 * c + 2] = z;
       var r, gr, b;
       if (sim.gouge[c]) { r = 0.9; gr = 0.18; b = 0.2; }
       else if (last && sim.uncut[c]) { r = 0.98; gr = 0.58; b = 0.15; }
-      else { var t = Math.max(0, Math.min(1, (z - zb) / ((zt - zb) || 1))); r = 0.42 + 0.42 * t; gr = 0.47 + 0.4 * t; b = 0.55 + 0.37 * t; }
+      else { var t = 0.6 + 0.4 * Math.max(0, Math.min(1, (z - zb) / ((zt - zb) || 1))); r = mc[0] * t; gr = mc[1] * t; b = mc[2] * t; } // deeper cuts darker
       col[3 * c] = r; col[3 * c + 1] = gr; col[3 * c + 2] = b;
     }
     sim.geom.attributes.position.needsUpdate = true;
@@ -1886,6 +1897,8 @@
       cfg.opsOff[el.dataset.opoff] = !el.checked;
     } else if (el.name === 'origin' || el.name === 'setups') {
       cfg[el.name] = el.value;
+    } else if (el.name === 'bottom') {
+      cfg.skin = el.value === 'through' ? (cfg.skin <= 0 ? cfg.skin : -0.2) : (cfg.skin > 0 ? cfg.skin : 1);
     } else if (el.name === 'outside') {
       cfg.outside = el.value;
     } else if (el.name === 'tabs') {

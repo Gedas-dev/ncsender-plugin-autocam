@@ -75,6 +75,8 @@
   @keyframes ac-spin { to { transform: rotate(360deg); } }
   #ac-root .ac-panel { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; padding-right: 2px; }
   #ac-root .ac-card { background: var(--ac-soft); border-radius: 12px; padding: 12px 14px; }
+  #ac-root #ac-next.ac-loadbtn { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.25; padding-top: 5px; padding-bottom: 5px; }
+  #ac-root #ac-next .ac-fname { display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(11 * var(--ac-u)); font-weight: 500; opacity: 0.85; margin-bottom: 1px; }
   #ac-root .ac-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 10px; }
   #ac-root .ac-stats b { display: block; font-size: calc(22 * var(--ac-u)); font-weight: 650; font-variant-numeric: tabular-nums; }
   #ac-root .ac-stats b small { font-size: calc(12 * var(--ac-u)); font-weight: 500; color: var(--ac-text2); }
@@ -117,7 +119,7 @@
   #ac-root .ac-ops li em { font-style: normal; font-size: calc(12 * var(--ac-u)); color: var(--ac-text2); font-variant-numeric: tabular-nums; }
   #ac-root .ac-total { display: flex; justify-content: space-between; font-weight: 600; margin-top: 8px; }
   #ac-root .ac-foot { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--ac-line); }
-  #ac-root .ac-foot .ac-status { flex: 1; color: var(--ac-text2); font-size: calc(12 * var(--ac-u)); }
+  #ac-root .ac-foot .ac-status { flex: 1; min-width: 0; color: var(--ac-text2); font-size: calc(12 * var(--ac-u)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* Hover, pressed and keyboard focus for everything clickable. */
   #ac-root .ac-btn, #ac-root .ac-stepbtn, #ac-root .ac-tab, #ac-root .ac-siderow, #ac-root .ac-seg button, #ac-root .ac-opt, #ac-root .ac-zgrid button {
     transition: background-color .12s, border-color .12s, filter .12s, transform .05s; }
@@ -1163,16 +1165,22 @@
     $('ac-back').disabled = state.step === 0;
     $('ac-save').classList.toggle('ac-hidden', state.step !== 3);
     $('ac-download').classList.toggle('ac-hidden', state.step !== 3);
+    // The buttons carry the program's file name, exactly as ncSender and the File Manager will show it.
+    var name = state.gcodes.length ? programName(state.active) : '';
+    var all = state.gcodes.map(function (g, i) { return programName(i); });
     $('ac-save').textContent = two ? 'Save both to File Manager' : 'Save to File Manager';
-    $('ac-download').textContent = two ? 'Download setup ' + (state.active + 1) : 'Download .nc';
+    $('ac-save').title = 'Saves to File Manager › AutoCAM/' + all.join(' and AutoCAM/');
+    $('ac-download').textContent = 'Download';
+    $('ac-download').title = 'Downloads ' + name;
+    next.classList.toggle('ac-loadbtn', state.step === 3);
     if (state.step === 0) { next.textContent = 'Next: Stock ›'; next.disabled = !state.analysis; }
     if (state.step === 1) { next.textContent = 'Next: Operations ›'; next.disabled = false; }
     if (state.step === 2) { next.textContent = 'Make toolpaths ›'; next.disabled = !camTools().some(function (t) { return t.kind === 'flat'; }); }
     if (state.step === 3) {
       var v = verdict(state.active);
-      next.textContent = two ? 'Load setup ' + (state.active + 1) + ' into ncSender' : 'Load into ncSender';
+      next.innerHTML = '<span class="ac-fname">' + esc(name) + '</span>Load into ncSender';
       next.disabled = !state.gcodes.length || !v || v.keepout || (v.fails > 0 && !state.override[state.active]);
-      next.title = !v ? 'Checking the program first…' : v.keepout ? 'The job goes into the ATC / keep-out zone with this zero' :
+      next.title = !v ? 'Checking the program first…' : !v.fails && !v.keepout ? 'Loads ' + name + ' into ncSender' : v.keepout ? 'The job goes into the ATC / keep-out zone with this zero' :
         v.fails && !state.override[state.active] ? 'Fix the failed checks, or tick “load anyway”' : '';
     }
   }

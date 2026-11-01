@@ -71,7 +71,8 @@ AutoCAM reads your 3D part, finds the pockets, holes, lettering and outline, pla
 
 ![Simulate & load](docs/4-simulate.jpg)
 
-- **Simulation** cuts the stock move by move. Red marks a cut into the part; orange marks material left behind.
+- **At the top**: run time, number of tools, tool changes, and the program's file name as it will appear in ncSender and the File Manager.
+- **Simulation** cuts the stock move by move with the real-size cutter, shank and collet. Areas cut right through disappear, so at the end you see the finished part on its own. Red marks a cut into the part; orange marks material left behind.
 - **Toolpaths** shows the moves, one colour per operation. Untick operations in the list to see them one at a time.
 - **Setup sheet** shows which face is up, which faces you, the stock size, and where the zero is.
 - **Load into ncSender**, **Save to File Manager** (in the `AutoCAM/` folder), or **Download .nc**.

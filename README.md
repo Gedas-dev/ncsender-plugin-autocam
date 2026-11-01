@@ -41,7 +41,7 @@ AutoCAM reads your 3D part, finds the pockets, holes, lettering and outline, pla
 
 ![Stock & zero](docs/2-stock-zero.jpg)
 
-- **Material** sets cutting speed, feed per tooth, depth per pass and stepover. The stock is drawn in the material's colour.
+- **Material** sets cutting speed, feed per tooth, depth per pass and stepover. The part and stock are drawn in the material's colour: brass yellow, wood brown, aluminium silver.
 - **Stock block** is the part plus a margin on each side and on top.
 - **Work zero (G54)** can be any of 9 points: a corner, the middle of an edge, or the centre. Z goes on the stock top or on the spoilboard.
 - **Setups**: one, or two with the block turned over.

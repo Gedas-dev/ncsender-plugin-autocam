@@ -505,7 +505,7 @@
   function buildPart(faceClass) {
     var T = window.__autocamTHREE;
     V.part.children.slice().forEach(function (c) { V.part.remove(c); disposeObject(c); });
-    var pos = [], nrm = [], col = [], idx = [], base = 0, faceIdx = 0;
+    var pos = [], nrm = [], col = [], idx = [], base = 0, faceIdx = 0, classes = [];
     V.triFace = [];
     state.source.forEach(function (m) {
       var p = m.attributes.position.array, n = m.attributes.normal ? m.attributes.normal.array : null, ix = m.index.array;
@@ -521,8 +521,8 @@
       for (var i = 0; i < count; i++) {
         pos.push(p[3 * i], p[3 * i + 1], p[3 * i + 2]);
         if (n) nrm.push(n[3 * i], n[3 * i + 1], n[3 * i + 2]);
-        var rgb = PALETTE[cls[i]] || PALETTE[0];
-        col.push(rgb[0], rgb[1], rgb[2]);
+        classes.push(cls[i]);
+        col.push(0, 0, 0); // set by tintPart
       }
       for (var t2 = 0; t2 < ix.length / 3; t2++) {
         idx.push(base + ix[3 * t2], base + ix[3 * t2 + 1], base + ix[3 * t2 + 2]);
@@ -538,8 +538,28 @@
     if (nrm.length === pos.length) g.setAttribute('normal', new T.Float32BufferAttribute(nrm, 3)); else g.computeVertexNormals();
     V.mesh = new T.Mesh(g, new T.MeshStandardMaterial({ vertexColors: true, metalness: 0.2, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: T.DoubleSide }));
     V.part.add(V.mesh);
+    V.classes = classes;
+    tintPart();
     V.part.add(new T.LineSegments(new T.EdgesGeometry(g, 28), new T.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.45 })));
   }
+
+  /** Colour the part like its material: flat faces in the material colour, the outline's side walls a shade darker,
+   *  pockets and holes tinted with their feature colour so they still stand out. Metals get a light sheen, wood and plastic none. */
+  function tintPart() {
+    if (!V || !V.mesh || !V.classes) return;
+    var m = matRGB(), col = V.mesh.geometry.attributes.color.array;
+    var look = [m, mix(m, PALETTE[1], 0.45), mix(m, PALETTE[2], 0.45), m.map(function (v) { return v * 0.72; })];
+    for (var i = 0; i < V.classes.length; i++) {
+      var rgb = look[V.classes[i]] || m;
+      col[3 * i] = rgb[0]; col[3 * i + 1] = rgb[1]; col[3 * i + 2] = rgb[2];
+    }
+    V.mesh.geometry.attributes.color.needsUpdate = true;
+    var metal = { aluminum: 1, brass: 1, steel: 1 }[cfg.material]; // a light sheen only: there is nothing to reflect
+    V.mesh.material.metalness = metal ? 0.15 : 0;
+    V.mesh.material.roughness = metal ? 0.5 : 0.85;
+    render();
+  }
+  function mix(a, b, t) { return [0, 1, 2].map(function (k) { return a[k] * (1 - t) + b[k] * t; }); }
 
   function clearOverlay() { V.overlay.children.slice().forEach(function (c) { V.overlay.remove(c); disposeObject(c); }); }
 
@@ -1873,7 +1893,7 @@
   panel.addEventListener('click', function (e) {
     if (e.target.closest('#ac-open2')) { $('ac-file').click(); return; }
     var mat = e.target.closest('[data-material]');
-    if (mat) { cfg.material = mat.dataset.material; changed(); return; }
+    if (mat) { cfg.material = mat.dataset.material; tintPart(); changed(); return; }
     var org = e.target.closest('[data-origin]');
     if (org) { setOrigin(org.dataset.origin); return; }
     var side = e.target.closest('[data-up]');

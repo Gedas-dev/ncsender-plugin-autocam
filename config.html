@@ -1097,10 +1097,12 @@
       if (ko && ko.hits.length) { setStatus('Not loaded: with the current G54 zero the job goes into the ' + ko.hits[0].zone + '.'); renderAll(); return; }
     }
     setStatus('Sending to ncSender…');
-    var res = await fetch(BASE_URL + '/api/gcode-files/load-temp', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: programName(state.active), content: state.gcodes[state.active] })
-    });
+    try {
+      var res = await fetch(BASE_URL + '/api/gcode-files/load-temp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: programName(state.active), content: state.gcodes[state.active] })
+      });
+    } catch (e) { setStatus('Could not reach ncSender: ' + e.message); return; }
     if (!res.ok) { setStatus('ncSender refused the program (' + res.status + ').'); return; }
     setStatus('Loaded ' + programName(state.active) + '.');
     // Remember the zero this setup ran with, so setup 2 can tell whether G54 was set again after turning the part over.
@@ -1114,9 +1116,11 @@
     var saved = [];
     for (var i = 0; i < state.gcodes.length; i++) {
       var path = 'AutoCAM/' + programName(i);
-      var res = await fetch(BASE_URL + '/api/gcode-files/file/save', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: path, content: state.gcodes[i] })
-      });
+      try {
+        var res = await fetch(BASE_URL + '/api/gcode-files/file/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: path, content: state.gcodes[i] })
+        });
+      } catch (e) { setStatus('Could not reach ncSender: ' + e.message); return; }
       if (!res.ok) { setStatus('Save failed (' + res.status + ').'); return; }
       saved.push(path);
     }
